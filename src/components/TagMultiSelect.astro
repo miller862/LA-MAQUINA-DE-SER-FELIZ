@@ -1,0 +1,258 @@
+---
+import { colorFor, tagKey } from '../theme';
+import type { Lang } from '../i18n';
+
+interface Props {
+  tags: string[];
+  lang: Lang;
+}
+const { tags, lang } = Astro.props;
+// Deduplicar por clave canónica para no mostrar Política y Politics
+const seen = new Set<string>();
+const uniqueTags = tags.filter(t => {
+  const k = tagKey(t);
+  if (seen.has(k)) return false;
+  seen.add(k);
+  return true;
+});
+
+const labels = {
+  es: { trigger: 'Filtrar por etiquetas', all: 'Todas', clear: 'Limpiar', selected: 'seleccionadas' },
+  en: { trigger: 'Filter by tags',        all: 'All',    clear: 'Clear',   selected: 'selected' },
+};
+const L = labels[lang];
+---
+
+<div class="tag-select" data-tag-select>
+  <button type="button" class="tag-select__trigger" aria-haspopup="listbox" aria-expanded="false">
+    <span class="tag-select__icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 6h18M6 12h12M10 18h4"/>
+      </svg>
+    </span>
+    <span class="tag-select__label" data-label>{L.trigger}</span>
+    <span class="tag-select__count hidden" data-count></span>
+    <svg class="tag-select__chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="6 9 12 15 18 9"/>
+    </svg>
+  </button>
+
+  <div class="tag-select__panel" role="listbox" aria-multiselectable="true">
+    <div class="tag-select__panel-head">
+      <span class="tag-select__panel-title">{L.trigger}</span>
+      <button type="button" class="tag-select__clear" data-clear>{L.clear}</button>
+    </div>
+    <ul class="tag-select__list">
+      {uniqueTags.map(tag => {
+        const c = colorFor(tag);
+        const k = tagKey(tag);
+        return (
+          <li>
+            <label class="tag-option">
+              <input type="checkbox" value={k} data-display={tag} />
+              <span class="tag-option__chip" style={`background:${c.bg};color:${c.fg};`}>#{tag}</span>
+            </label>
+          </li>
+        );
+      })}
+    </ul>
+    <div class="tag-select__panel-foot">
+      <span class="tag-select__hint" data-hint>0 {L.selected}</span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .tag-select {
+    position: relative;
+    display: inline-block;
+    z-index: 60;
+  }
+  .tag-select.is-open { z-index: 200; }
+
+  .tag-select__trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    padding: 0.55rem 0.95rem;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 0.88rem;
+    font-weight: 500;
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-fast);
+  }
+  .tag-select__trigger:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+  .tag-select__trigger[aria-expanded="true"] {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 20%, transparent);
+  }
+
+  .tag-select__icon { display: inline-flex; }
+  .tag-select__chev { transition: transform var(--transition-fast); }
+  .tag-select__trigger[aria-expanded="true"] .tag-select__chev { transform: rotate(180deg); }
+
+  .tag-select__count {
+    background: var(--color-primary);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.05rem 0.45rem;
+    border-radius: var(--radius-full);
+    min-width: 18px;
+    text-align: center;
+  }
+  .hidden { display: none !important; }
+
+  .tag-select__panel {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    min-width: 320px;
+    max-width: 420px;
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    padding: 0.6rem;
+    z-index: 300;
+    opacity: 0;
+    transform: translateY(-6px);
+    pointer-events: none;
+    transition: opacity var(--transition-fast), transform var(--transition-fast);
+  }
+  .tag-select.is-open .tag-select__panel {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .tag-select__panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.25rem 0.5rem 0.5rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .tag-select__panel-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .tag-select__clear {
+    background: none;
+    border: none;
+    color: var(--color-text-secondary);
+    font-size: 0.78rem;
+    cursor: pointer;
+    font-family: var(--font-body);
+    padding: 0.2rem 0.4rem;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+  }
+  .tag-select__clear:hover {
+    background: var(--color-bg-hover);
+    color: var(--color-primary);
+  }
+
+  .tag-select__list {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0.7rem 0.5rem;
+    max-height: 280px;
+    overflow-y: auto;
+  }
+
+  .tag-option { cursor: pointer; }
+  .tag-option input { display: none; }
+  .tag-option__chip {
+    display: inline-block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.35rem 0.7rem;
+    border-radius: var(--radius-full);
+    opacity: 0.55;
+    transition: all var(--transition-fast);
+    border: 2px solid transparent;
+    user-select: none;
+  }
+  .tag-option__chip:hover { opacity: 0.85; transform: translateY(-1px); }
+  .tag-option input:checked + .tag-option__chip {
+    opacity: 1;
+    box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 20%, transparent);
+  }
+
+  .tag-select__panel-foot {
+    padding: 0.4rem 0.5rem 0.2rem;
+    border-top: 1px solid var(--color-border);
+  }
+  .tag-select__hint {
+    font-size: 0.72rem;
+    color: var(--color-text-muted);
+  }
+</style>
+
+<script>
+  // Inicialización por instancia
+  document.querySelectorAll<HTMLElement>('[data-tag-select]').forEach(root => {
+    const trigger  = root.querySelector<HTMLButtonElement>('.tag-select__trigger')!;
+    const label    = root.querySelector<HTMLElement>('[data-label]')!;
+    const count    = root.querySelector<HTMLElement>('[data-count]')!;
+    const clearBtn = root.querySelector<HTMLButtonElement>('[data-clear]')!;
+    const hint     = root.querySelector<HTMLElement>('[data-hint]')!;
+    const inputs   = root.querySelectorAll<HTMLInputElement>('input[type="checkbox"]');
+
+    const hintTpl = hint.textContent || '';
+    const baseLabel = label.textContent || '';
+
+    function update() {
+      const checked = [...inputs].filter(i => i.checked);
+      const keys    = checked.map(i => i.value);
+      const display = checked.map(i => i.dataset.display || i.value);
+      const n = keys.length;
+
+      if (n === 0) {
+        label.textContent = baseLabel;
+        count.classList.add('hidden');
+      } else {
+        label.textContent = n === 1 ? `#${display[0]}` : baseLabel;
+        count.textContent = String(n);
+        count.classList.remove('hidden');
+      }
+      hint.textContent = hintTpl.replace(/^\d+/, String(n));
+
+      // Dispara evento global para que las grids filtren (claves canónicas)
+      window.dispatchEvent(new CustomEvent('tag-filter-change', { detail: { tagKeys: keys } }));
+    }
+
+    trigger.addEventListener('click', e => {
+      e.stopPropagation();
+      root.classList.toggle('is-open');
+      trigger.setAttribute('aria-expanded', root.classList.contains('is-open') ? 'true' : 'false');
+    });
+
+    document.addEventListener('click', e => {
+      if (!root.contains(e.target as Node)) {
+        root.classList.remove('is-open');
+        trigger.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    inputs.forEach(i => i.addEventListener('change', update));
+    clearBtn.addEventListener('click', () => {
+      inputs.forEach(i => i.checked = false);
+      update();
+    });
+  });
+</script>

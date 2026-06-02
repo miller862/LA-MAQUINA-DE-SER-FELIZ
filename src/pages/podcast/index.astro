@@ -1,0 +1,31 @@
+---
+import Base from '../../layouts/Base.astro';
+import { t } from '../../i18n';
+---
+
+<Base lang="es" title={t('es', 'nav.podcast')}>
+  <div class="coming-page">
+    <div class="coming-icon">🎙️</div>
+    <h1>{t('es', 'nav.podcast')}</h1>
+    <p class="coming-desc">{t('es', 'vertical.podcast.desc')}</p>
+    <p class="coming-label">{t('es', 'coming.title')}</p>
+    <p class="coming-text">{t('es', 'coming.text')}</p>
+  </div>
+</Base>
+
+<style>
+  .coming-page {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; text-align: center;
+    padding: 6rem 1rem; gap: 1rem;
+  }
+  .coming-icon { font-size: 3rem; }
+  h1 { font-size: 2.5rem; }
+  .coming-desc { color: var(--color-text-secondary); max-width: 400px; }
+  .coming-label {
+    margin-top: 1rem;
+    font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--color-primary-light);
+  }
+  .coming-text { color: var(--color-text-muted); font-size: 0.9rem; }
+</style>

@@ -1,0 +1,285 @@
+---
+import type { Lang } from '../i18n';
+import { colorFor, tagKey } from '../theme';
+import PodcastPlayer from './PodcastPlayer.astro';
+
+interface Props {
+  title:              string;
+  date:               string;
+  description:        string;
+  tags:               string[];
+  cover?:             string;
+  href:               string;
+  vertical:           'pensamiento' | 'ciencia-de-datos' | 'podcast';
+  lang:               Lang;
+  index?:             number;
+  podcastEpisodeUrl?: string;
+}
+
+const { title, date, description, tags, cover, href, vertical, lang, index = 0, podcastEpisodeUrl } = Astro.props;
+// Muestra el panel si el campo existe en el frontmatter (aunque sea string vacío = mockup)
+const showPodcastPanel = podcastEpisodeUrl !== undefined && podcastEpisodeUrl !== null;
+const verticalKey = vertical === 'ciencia-de-datos' ? 'data' : vertical;
+
+const verticalLabel: Record<string, string> = {
+  'pensamiento':      lang === 'es' ? 'Pensamiento'      : 'Thinking',
+  'ciencia-de-datos': lang === 'es' ? 'Ciencia de Datos' : 'Data Science',
+  'podcast':          lang === 'es' ? 'Podcast'          : 'Podcast',
+};
+
+// Fallback visual cuando no hay cover: gradiente por vertical
+const noCoverGradient = {
+  pensamiento: 'linear-gradient(135deg, #A78BFA 0%, #7C3AED 60%, #6D28D9 100%)',
+  data:        'linear-gradient(135deg, #7DD3FC 0%, #0EA5E9 60%, #0369A1 100%)',
+  podcast:     'linear-gradient(135deg, #FDA4AF 0%, #F43F5E 60%, #BE123C 100%)',
+}[verticalKey];
+
+const canonicalTagKeys = tags.map(tagKey).join(',');
+---
+
+<article
+  class={`post-card post-card--${verticalKey} fade-up${showPodcastPanel ? ' has-podcast' : ''}`}
+  style={`--i: ${index};`}
+  data-vertical={verticalKey}
+  data-tag-keys={canonicalTagKeys}
+>
+  <a href={href} class="card-link">
+    <div class="card-cover" style={cover ? (cover.endsWith('.svg') ? `background: ${noCoverGradient};` : ``) : `background: ${noCoverGradient};`}>
+      {cover
+        ? <img src={cover} alt={title} loading="lazy" class={cover.endsWith('.svg') ? 'cover-svg' : ''} />
+        : <span class="card-cover__placeholder">
+            {verticalKey === 'pensamiento' && '✦'}
+            {verticalKey === 'data' && '◐'}
+            {verticalKey === 'podcast' && '◉'}
+          </span>
+      }
+      <span class={`card-vertical-pill card-vertical-pill--${verticalKey}`}>
+        {verticalLabel[vertical]}
+      </span>
+    </div>
+
+    <div class="card-body">
+      <time class="card-date">{date}</time>
+      <h2 class="card-title">{title}</h2>
+      <p class="card-desc">{description}</p>
+      <ul class="card-tags">
+        {tags.map(tag => {
+          const c = colorFor(tag);
+          return (
+            <li class="tag-chip" style={`background:${c.bg};color:${c.fg};`}>#{tag}</li>
+          );
+        })}
+      </ul>
+    </div>
+  </a>
+
+  {showPodcastPanel && (
+    <div class="card-podcast-panel">
+      <PodcastPlayer episodeUrl={podcastEpisodeUrl} compact={true} title={title} />
+    </div>
+  )}
+</article>
+
+<style>
+  .post-card {
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    transition:
+      transform var(--transition-normal),
+      box-shadow var(--transition-normal),
+      border-color var(--transition-normal);
+    box-shadow: var(--shadow-card);
+    will-change: transform;
+  }
+  .post-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-card-hover);
+  }
+  .post-card--pensamiento:hover { border-color: var(--color-pensamiento); }
+  .post-card--data:hover        { border-color: var(--color-data); }
+  .post-card--podcast:hover     { border-color: var(--color-podcast); }
+
+  /* Podcast: borde sutil con tinte rosa siempre, indica naturaleza distinta */
+  .post-card--podcast {
+    background: linear-gradient(135deg, var(--color-bg-surface) 0%, var(--color-podcast-tint) 100%);
+  }
+  .post-card--podcast .card-body::before {
+    content: '🎙';
+    font-size: 0.9rem;
+    position: absolute;
+    top: 1.75rem;
+    right: 2rem;
+    opacity: 0.5;
+  }
+  .post-card--podcast .card-body { position: relative; }
+
+  .card-link {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 0;
+    color: inherit;
+    text-decoration: none;
+    align-items: stretch;
+  }
+  /* Ciencia de Datos: tarjeta espejada — imagen a la derecha */
+  .post-card--data .card-link {
+    grid-template-columns: 1fr 280px;
+  }
+  .post-card--data .card-cover { order: 2; }
+  .post-card--data .card-body  { order: 1; }
+  .post-card--data .card-vertical-pill {
+    left: auto;
+    right: 1rem;
+  }
+  @media (max-width: 720px) {
+    .card-link,
+    .post-card--data .card-link { grid-template-columns: 1fr; }
+    .post-card--data .card-cover { order: 0; }
+    .post-card--data .card-body  { order: 1; }
+  }
+
+  /* COVER */
+  .card-cover {
+    position: relative;
+    overflow: hidden;
+    background: var(--color-bg-muted);
+    min-height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .card-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform var(--transition-slow);
+  }
+  .post-card:hover .card-cover img { transform: scale(1.05); }
+
+  /* SVG covers: centrado sin recorte, sobre el gradiente de la vertical */
+  .card-cover img.cover-svg {
+    object-fit: contain;
+    padding: 1.25rem;
+    opacity: 0.92;
+  }
+  .post-card:hover .card-cover img.cover-svg { transform: scale(1.03); }
+
+  .card-cover__placeholder {
+    font-size: 4rem;
+    color: rgba(255, 255, 255, 0.85);
+    font-family: var(--font-display);
+    text-shadow: 0 4px 24px rgba(0,0,0,0.2);
+  }
+
+  .card-vertical-pill {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.35rem 0.7rem;
+    border-radius: var(--radius-full);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.92);
+  }
+  .card-vertical-pill--pensamiento { color: var(--color-pensamiento); }
+  .card-vertical-pill--data        { color: var(--color-data); }
+  .card-vertical-pill--podcast     { color: var(--color-podcast); }
+
+  /* BODY */
+  .card-body {
+    padding: 1.75rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    justify-content: center;
+  }
+
+  .card-date {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .card-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.35rem, 2.2vw, 1.7rem);
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--color-text);
+    letter-spacing: -0.015em;
+    transition: color var(--transition-fast);
+  }
+  .post-card--pensamiento:hover .card-title { color: var(--color-pensamiento); }
+  .post-card--data:hover .card-title        { color: var(--color-data); }
+  .post-card--podcast:hover .card-title     { color: var(--color-podcast); }
+
+  .card-desc {
+    font-size: 0.95rem;
+    color: var(--color-text-secondary);
+    line-height: 1.65;
+    /* clamp a 3 líneas */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card-tags {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.4rem;
+  }
+  .tag-chip {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.25rem 0.65rem;
+    border-radius: var(--radius-full);
+    transition: transform var(--transition-fast);
+  }
+  .tag-chip:hover { transform: translateY(-1px); }
+
+  /* ── Panel de podcast lateral ── */
+  .card-podcast-panel {
+    border-top: 1px dashed var(--color-podcast);
+    padding: 0.85rem 1.25rem;
+    background: linear-gradient(90deg, var(--color-bg-surface) 0%, var(--color-podcast-tint) 100%);
+    border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+  }
+
+  /* En pantallas grandes: tarjeta se divide — contenido a la izquierda, podcast a la derecha */
+  @media (min-width: 860px) {
+    .post-card.has-podcast {
+      display: grid;
+      grid-template-columns: 1fr 200px;
+      grid-template-rows: 1fr;
+    }
+    .post-card.has-podcast > a.card-link {
+      grid-column: 1;
+      grid-row: 1;
+    }
+    .post-card.has-podcast .card-podcast-panel {
+      grid-column: 2;
+      grid-row: 1;
+      border-top: none;
+      border-left: 1px dashed var(--color-podcast);
+      border-radius: 0 var(--radius-xl) var(--radius-xl) 0;
+      background: linear-gradient(180deg, var(--color-bg-surface) 0%, var(--color-podcast-tint) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem 1rem;
+    }
+  }
+</style>

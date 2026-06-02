@@ -1,0 +1,238 @@
+---
+import { t, localizedPath, getOppositeLocale, type Lang } from '../i18n';
+
+interface Props {
+  lang: Lang;
+  currentPath: string;
+}
+const { lang, currentPath } = Astro.props;
+const otherLang = getOppositeLocale(lang);
+const otherPath = localizedPath(otherLang, currentPath);
+
+// La home funciona como Blog (Pensamiento + Datos conviven allí). El header
+// expone Blog, Podcast y Sobre mí.
+const home = lang === 'es' ? '/' : '/en';
+const navItems = [
+  { href: home,                              label: t(lang, 'nav.blog'),    key: 'blog' },
+  { href: localizedPath(lang, '/podcast'),   label: t(lang, 'nav.podcast'), key: 'podcast' },
+  { href: localizedPath(lang, '/sobre-mi'),  label: t(lang, 'nav.sobre'),   key: 'about' },
+];
+---
+
+<header class="site-header">
+  <nav class="nav-inner">
+    <ul class="nav-links">
+      {navItems.map(item => {
+        const inBlog = currentPath === '/' || currentPath === '/en'
+          || /^\/(en\/)?(pensamiento|thinking|ciencia-de-datos|data-science)\//.test(currentPath);
+        const active = item.key === 'blog'
+          ? inBlog
+          : (currentPath.startsWith(item.href) && item.href !== '/' && item.href !== '/en');
+        return (
+          <li>
+            <a href={item.href} class={`nav-link nav-link--${item.key} ${active ? 'is-active' : ''} ${item.key === 'blog' ? 'nav-link--primary' : ''}`}>
+              {item.key === 'blog' && <span class="site-name-dot"></span>}
+              {item.label}
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+
+    <div class="nav-actions">
+      <button
+        id="theme-toggle"
+        class="icon-btn"
+        aria-label="Toggle theme"
+        title="Cambiar tema"
+      >
+        <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+        </svg>
+        <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+
+      <a
+        href="https://github.com/miller862"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="icon-btn"
+        aria-label="GitHub"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.34-3.369-1.34-.454-1.154-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.268 2.75 1.026A9.578 9.578 0 0 1 12 6.836a9.59 9.59 0 0 1 2.504.337c1.909-1.294 2.747-1.026 2.747-1.026.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.741 0 .267.18.579.688.481C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/>
+        </svg>
+      </a>
+
+      <a
+        href="https://www.linkedin.com/in/manuel-miller/"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="icon-btn"
+        aria-label="LinkedIn"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+          <rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/>
+        </svg>
+      </a>
+
+      <a href={otherPath} class="lang-toggle" aria-label="Cambiar idioma">
+        {otherLang.toUpperCase()}
+      </a>
+    </div>
+  </nav>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: color-mix(in srgb, var(--color-bg) 75%, transparent);
+    border-bottom: 1px solid var(--color-border);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  .nav-inner {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    height: 68px;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .nav-links {
+    display: flex;
+    list-style: none;
+    gap: 0.25rem;
+    flex: 1;
+    align-items: center;
+  }
+
+  .nav-link {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    padding: 0.45rem 0.85rem;
+    border-radius: var(--radius-full);
+    transition: all var(--transition-fast);
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .nav-link:hover {
+    color: var(--color-text);
+    background: var(--color-bg-hover);
+  }
+  .nav-link.is-active {
+    color: var(--color-text);
+    background: var(--color-bg-hover);
+  }
+  .nav-link.is-active::before {
+    content: '';
+    position: absolute;
+    left: 0.85rem; right: 0.85rem;
+    bottom: 4px;
+    height: 2px;
+    border-radius: 2px;
+  }
+  .nav-link--blog.is-active::before    { background: var(--gradient-hero); }
+  .nav-link--podcast.is-active::before { background: var(--color-podcast); }
+  .nav-link--about.is-active::before   { background: var(--color-text-muted); }
+
+  /* Blog link toma la identidad visual del antiguo site-name */
+  .nav-link--primary {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--color-text);
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    padding: 0.45rem 0.85rem 0.45rem 0.5rem;
+    margin-right: 0.75rem;
+    background: none !important;
+  }
+  .nav-link--primary:hover { color: var(--color-primary); background: none !important; }
+  .nav-link--primary::before { display: none !important; }
+
+  .site-name-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--gradient-hero);
+    box-shadow: 0 0 12px var(--color-primary);
+    flex-shrink: 0;
+  }
+
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  .icon-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+    color: var(--color-text-secondary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+  .icon-btn:hover {
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Sun/moon swap por tema */
+  .icon-sun { display: none; }
+  .icon-moon { display: block; }
+  :global(:root[data-theme="dark"]) .icon-sun { display: block; }
+  :global(:root[data-theme="dark"]) .icon-moon { display: none; }
+
+  .lang-toggle {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-surface);
+    padding: 0.35rem 0.7rem;
+    border-radius: var(--radius-full);
+    transition: all var(--transition-fast);
+  }
+  .lang-toggle:hover {
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+  }
+
+  @media (max-width: 720px) {
+    .nav-links { display: none; }
+  }
+</style>
+
+<script>
+  const btn = document.getElementById('theme-toggle');
+  const root = document.documentElement;
+  btn?.addEventListener('click', () => {
+    const current = root.getAttribute('data-theme') || 'light';
+    const next = current === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('theme', next); } catch (e) {}
+  });
+</script>

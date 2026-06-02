@@ -1,0 +1,156 @@
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color var(--transition-normal), color var(--transition-normal);
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Glow ambiental */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: var(--gradient-glow);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.7;
+}
+
+main, header, footer { position: relative; z-index: 1; }
+
+/* Typography */
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  line-height: 1.15;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+a:hover { color: var(--color-primary-light); }
+
+code, pre {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+}
+
+pre {
+  background: var(--color-bg-muted);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  overflow-x: auto;
+}
+
+/* Prose */
+.prose { max-width: 70ch; margin: 0 auto; }
+.prose h2 { font-size: 1.75rem; margin: 2.5rem 0 1rem; }
+.prose h3 { font-size: 1.35rem; margin: 1.75rem 0 0.5rem; }
+.prose p  { margin-bottom: 1.25rem; }
+.prose ul, .prose ol { padding-left: 1.5rem; margin-bottom: 1.25rem; }
+.prose li { margin-bottom: 0.4rem; }
+.prose blockquote {
+  border-left: 3px solid var(--color-primary);
+  padding-left: 1rem;
+  color: var(--color-text-secondary);
+  font-style: italic;
+  margin: 1.5rem 0;
+}
+
+/* Song / lyric quote block */
+.prose blockquote.song-quote {
+  border-left: none;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  padding: 1.5rem 1.75rem;
+  margin: 2.5rem 0;
+  background: var(--color-bg-surface);
+  border-radius: var(--radius-md);
+  font-style: italic;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  line-height: 1.8;
+  color: var(--color-text);
+  position: relative;
+}
+.prose blockquote.song-quote::before {
+  content: '\201C';
+  position: absolute;
+  top: -0.5rem;
+  left: 1.25rem;
+  font-size: 4rem;
+  color: var(--color-primary);
+  font-family: var(--font-display);
+  line-height: 1;
+  opacity: 0.5;
+}
+.prose blockquote.song-quote p {
+  margin: 0 0 0.75rem;
+}
+.prose blockquote.song-quote footer {
+  font-size: 0.8rem;
+  font-style: normal;
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-border-light); border-radius: var(--radius-full); }
+::-webkit-scrollbar-thumb:hover { background: var(--color-text-muted); }
+
+/* Selection */
+::selection { background: var(--color-primary); color: #fff; }
+
+/* Animaciones reutilizables */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.fade-up { animation: fadeUp 0.6s cubic-bezier(.4,0,.2,1) both; }
+.fade-in { animation: fadeIn 0.6s ease both; }
+
+/* Stagger helper — para usar con --i */
+[style*="--i"] { animation-delay: calc(var(--i) * 80ms); }
+
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

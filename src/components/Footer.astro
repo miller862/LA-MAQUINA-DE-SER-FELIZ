@@ -1,0 +1,21 @@
+---
+import { t, type Lang } from '../i18n';
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <p>© {year} Manuel Miller — {t(lang, 'footer.rights')}</p>
+</footer>
+
+<style>
+  .site-footer {
+    text-align: center;
+    padding: 2rem 1.5rem;
+    margin-top: 4rem;
+    border-top: 1px solid var(--color-border);
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+  }
+</style>
