@@ -6,6 +6,7 @@ tags: ["Philosophy", "Politics", "Byung-Chul Han"]
 cover: "/img/linea_curva.svg"
 lang: en
 postId: rituales
+podcastEpisodeUrl: ""
 ---
 
 ## Yes, this blog begins inspired by Byung Chul-Han.
