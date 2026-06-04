@@ -29,9 +29,9 @@ const verticalLabel: Record<string, string> = {
 
 // Fallback visual cuando no hay cover: gradiente por vertical
 const noCoverGradient = {
-  pensamiento: 'linear-gradient(135deg, #A78BFA 0%, #7C3AED 60%, #6D28D9 100%)',
-  data:        'linear-gradient(135deg, #7DD3FC 0%, #0EA5E9 60%, #0369A1 100%)',
-  podcast:     'linear-gradient(135deg, #FDA4AF 0%, #F43F5E 60%, #BE123C 100%)',
+  pensamiento: 'linear-gradient(135deg, #6E78B5 0%, #4C5BAA 60%, #3D4A8C 100%)',
+  data:        'linear-gradient(135deg, #5FA0A0 0%, #2F7E7E 60%, #246363 100%)',
+  podcast:     'linear-gradient(135deg, #C99576 0%, #B06B4A 60%, #8E5238 100%)',
 }[verticalKey];
 
 const canonicalTagKeys = tags.map(tagKey).join(',');
@@ -202,18 +202,19 @@ const canonicalTagKeys = tags.map(tagKey).join(',');
   }
 
   .card-date {
-    font-size: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
     color: var(--color-text-muted);
     font-variant-numeric: tabular-nums;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
-    font-weight: 600;
+    font-weight: 500;
   }
 
   .card-title {
     font-family: var(--font-display);
-    font-size: clamp(1.35rem, 2.2vw, 1.7rem);
-    font-weight: 700;
+    font-size: clamp(1.5rem, 2.4vw, 1.85rem);
+    font-weight: 600;
     line-height: 1.2;
     color: var(--color-text);
     letter-spacing: -0.015em;

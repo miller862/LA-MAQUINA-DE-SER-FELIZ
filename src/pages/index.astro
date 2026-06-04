@@ -39,7 +39,6 @@ const verticals = [
 
 <Base lang={lang}>
   <div class="home" data-home>
-    <div class="ambient-bg"></div>
 
     <!-- HERO -->
     <section class="hero fade-up">
@@ -80,8 +79,8 @@ const verticals = [
             <span class="v-panel__count">{v.count}</span>
             <span class="v-panel__count-label">{v.count === 1 ? 'entrada' : 'entradas'}</span>
             <span class="v-panel__state">
-              <span class="off">Tocar para enfocar →</span>
-              <span class="on">✓ Enfocado · tocá de nuevo para volver</span>
+              <span class="off">Ver entradas →</span>
+              <span class="on">Mostrando esta sección · volver</span>
             </span>
           </div>
         </button>
@@ -119,29 +118,9 @@ const verticals = [
 </Base>
 
 <style>
-  /* HOME wrapper: contiene un fondo ambiental que cambia según vertical */
+  /* HOME wrapper */
   .home {
     position: relative;
-  }
-  .ambient-bg {
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity var(--transition-slow), background var(--transition-slow);
-  }
-  .home[data-active="pensamiento"] .ambient-bg {
-    opacity: 1;
-    background:
-      radial-gradient(60% 50% at 20% 0%, var(--color-pensamiento-tint-strong), transparent 60%),
-      radial-gradient(50% 40% at 90% 30%, var(--color-pensamiento-tint), transparent 70%);
-  }
-  .home[data-active="data"] .ambient-bg {
-    opacity: 1;
-    background:
-      radial-gradient(60% 50% at 20% 0%, var(--color-data-tint-strong), transparent 60%),
-      radial-gradient(50% 40% at 90% 30%, var(--color-data-tint), transparent 70%);
   }
 
   /* HERO */
@@ -160,12 +139,11 @@ const verticals = [
   .hero-name {
     font-family: var(--font-display);
     font-size: clamp(3rem, 9vw, 6rem);
-    font-weight: 800;
-    background: var(--gradient-hero);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    font-weight: 600;
+    color: var(--color-text);
     line-height: 1.02;
     margin-bottom: 1.5rem;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.01em;
   }
   .hero-intro {
     font-size: 1.15rem;
@@ -210,16 +188,16 @@ const verticals = [
     row-gap: 1.1rem;
   }
 
-  /* Acento lateral grueso */
+  /* Acento lateral: línea fina sólida */
   .v-panel::before {
     content: '';
     position: absolute;
     left: 0; top: 0; bottom: 0;
-    width: 6px;
+    width: 3px;
     transition: width var(--transition-normal);
   }
-  .v-panel--pensamiento::before { background: linear-gradient(180deg, var(--color-pensamiento), var(--color-pensamiento-soft)); }
-  .v-panel--data::before        { background: linear-gradient(180deg, var(--color-data),        var(--color-data-soft)); }
+  .v-panel--pensamiento::before { background: var(--color-pensamiento); }
+  .v-panel--data::before        { background: var(--color-data); }
 
   .v-panel:hover {
     transform: translateY(-3px);
@@ -227,20 +205,18 @@ const verticals = [
   }
   .v-panel--pensamiento:hover { border-color: var(--color-pensamiento); }
   .v-panel--data:hover        { border-color: var(--color-data); }
-  .v-panel:hover::before { width: 10px; }
+  .v-panel:hover::before { width: 5px; }
 
-  /* Activo: la tarjeta se llena con su color */
-  .v-panel[aria-pressed="true"] {
-    color: #fff;
-    border-color: transparent;
-  }
+  /* Activo: tinte sutil + borde de color, texto en tinta (sobrio) */
   .v-panel--pensamiento[aria-pressed="true"] {
-    background: linear-gradient(135deg, var(--color-pensamiento) 0%, #6D28D9 100%);
+    background: var(--color-pensamiento-tint);
+    border-color: var(--color-pensamiento);
   }
   .v-panel--data[aria-pressed="true"] {
-    background: linear-gradient(135deg, var(--color-data) 0%, #0369A1 100%);
+    background: var(--color-data-tint);
+    border-color: var(--color-data);
   }
-  .v-panel[aria-pressed="true"]::before { width: 0; }
+  .v-panel[aria-pressed="true"]::before { width: 5px; }
 
   /* ICONO */
   .v-panel__icon {
@@ -257,19 +233,15 @@ const verticals = [
   .v-panel--pensamiento .v-panel__icon { background: var(--color-pensamiento-tint); color: var(--color-pensamiento); }
   .v-panel--data .v-panel__icon        { background: var(--color-data-tint);        color: var(--color-data); }
   .v-panel:hover .v-panel__icon { transform: scale(1.06) rotate(-3deg); }
-  .v-panel[aria-pressed="true"] .v-panel__icon {
-    background: rgba(255,255,255,0.18);
-    color: #fff;
-  }
 
   /* TEXTO */
   .v-panel__text { grid-column: 2; }
   .v-panel__title {
     font-family: var(--font-display);
-    font-size: 1.85rem;
-    font-weight: 800;
+    font-size: 2rem;
+    font-weight: 600;
     line-height: 1.05;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.01em;
     margin-bottom: 0.35rem;
   }
   .v-panel__subtitle {
@@ -280,14 +252,12 @@ const verticals = [
     color: var(--color-text-muted);
     margin-bottom: 0.75rem;
   }
-  .v-panel[aria-pressed="true"] .v-panel__subtitle { color: rgba(255,255,255,0.78); }
 
   .v-panel__desc {
     font-size: 0.95rem;
     line-height: 1.55;
     color: var(--color-text-secondary);
   }
-  .v-panel[aria-pressed="true"] .v-panel__desc { color: rgba(255,255,255,0.92); }
 
   /* META */
   .v-panel__meta {
@@ -300,23 +270,22 @@ const verticals = [
     border-top: 1px solid var(--color-border);
     margin-top: 0.25rem;
   }
-  .v-panel[aria-pressed="true"] .v-panel__meta { border-top-color: rgba(255,255,255,0.25); }
 
   .v-panel__count {
-    font-family: var(--font-display);
-    font-size: 2rem;
-    font-weight: 800;
+    font-family: var(--font-mono);
+    font-size: 1.6rem;
+    font-weight: 500;
     line-height: 1;
+    font-variant-numeric: tabular-nums;
   }
   .v-panel--pensamiento .v-panel__count { color: var(--color-pensamiento); }
   .v-panel--data        .v-panel__count { color: var(--color-data); }
-  .v-panel[aria-pressed="true"] .v-panel__count { color: #fff; }
 
   .v-panel__count-label {
-    font-size: 0.85rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
     color: var(--color-text-muted);
   }
-  .v-panel[aria-pressed="true"] .v-panel__count-label { color: rgba(255,255,255,0.85); }
 
   .v-panel__state {
     margin-left: auto;
@@ -324,7 +293,6 @@ const verticals = [
     font-weight: 600;
     color: var(--color-text-muted);
   }
-  .v-panel[aria-pressed="true"] .v-panel__state { color: rgba(255,255,255,0.92); }
   .v-panel__state .on { display: none; }
   .v-panel[aria-pressed="true"] .v-panel__state .off { display: none; }
   .v-panel[aria-pressed="true"] .v-panel__state .on  { display: inline; }
