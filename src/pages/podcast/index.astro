@@ -1,31 +1,82 @@
 ---
 import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+import { isPublished } from '../../content/visibility';
+import PostCard from '../../components/PostCard.astro';
 import { t } from '../../i18n';
+
+const lang = 'es';
+const episodes = (await getCollection('podcast', e => e.data.lang === 'es' && isPublished(e)))
+  .sort((a, b) => b.data.date.localeCompare(a.data.date));
+const hasEpisodes = episodes.length > 0;
 ---
 
-<Base lang="es" title={t('es', 'nav.podcast')}>
-  <div class="coming-page">
-    <div class="coming-icon">🎙️</div>
-    <h1>{t('es', 'nav.podcast')}</h1>
-    <p class="coming-desc">{t('es', 'vertical.podcast.desc')}</p>
-    <p class="coming-label">{t('es', 'coming.title')}</p>
-    <p class="coming-text">{t('es', 'coming.text')}</p>
+<Base lang={lang} title={t(lang, 'podcast.name')} description={t(lang, 'podcast.tagline')}>
+  <div class="podcast">
+    <section class="pod-hero">
+      <figure class="pod-art">
+        <img
+          src="/img/lamaquina-800.jpg"
+          srcset="/img/lamaquina-400.jpg 400w, /img/lamaquina-800.jpg 800w, /img/lamaquina-1200.jpg 1200w"
+          sizes="(max-width: 720px) 100vw, 320px"
+          alt="La Máquina de Ser Feliz — ilustración"
+          loading="eager"
+          width="320" height="320"
+        />
+      </figure>
+      <div class="pod-intro">
+        <p class="pod-eyebrow">Podcast</p>
+        <h1>{t(lang, 'podcast.name')}</h1>
+        <p class="pod-tagline">{t(lang, 'podcast.tagline')}</p>
+        <p class="pod-text">{t(lang, 'podcast.intro')}</p>
+      </div>
+    </section>
+
+    {hasEpisodes ? (
+      <section class="pod-episodes">
+        <h2 class="pod-episodes__title">{t(lang, 'podcast.episodes')}</h2>
+        <div class="pod-episodes__list">
+          {episodes.map((entry, i) => (
+            <PostCard
+              title={entry.data.title}
+              date={entry.data.date}
+              description={entry.data.description}
+              tags={entry.data.tags}
+              cover={entry.data.cover}
+              href={`/podcast/${entry.data.postId}`}
+              vertical="podcast"
+              lang={lang}
+              index={i}
+              podcastEpisodeUrl={entry.data.podcastEpisodeUrl}
+            />
+          ))}
+        </div>
+      </section>
+    ) : (
+      <section class="pod-soon">
+        <span class="pod-soon__dot" aria-hidden="true"></span>
+        <p class="pod-soon__label">{t(lang, 'podcast.soon.label')}</p>
+        <p class="pod-soon__text">{t(lang, 'podcast.soon.text')}</p>
+      </section>
+    )}
   </div>
 </Base>
 
 <style>
-  .coming-page {
-    display: flex; flex-direction: column; align-items: center;
-    justify-content: center; text-align: center;
-    padding: 6rem 1rem; gap: 1rem;
-  }
-  .coming-icon { font-size: 3rem; }
-  h1 { font-size: 2.5rem; }
-  .coming-desc { color: var(--color-text-secondary); max-width: 400px; }
-  .coming-label {
-    margin-top: 1rem;
-    font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase;
-    color: var(--color-primary-light);
-  }
-  .coming-text { color: var(--color-text-muted); font-size: 0.9rem; }
+  .podcast { max-width: 860px; margin: 0 auto; padding: 3.5rem 0 5rem; }
+  .pod-hero { display: grid; grid-template-columns: 320px 1fr; gap: 2.5rem; align-items: center; padding-bottom: 2.5rem; margin-bottom: 2.5rem; border-bottom: 1px solid var(--color-border); }
+  .pod-art { margin: 0; position: relative; }
+  .pod-art img { width: 100%; height: auto; border-radius: var(--radius-lg); display: block; box-shadow: var(--shadow-card); }
+  .pod-art::after { content: ''; position: absolute; inset: 14px -14px -14px 14px; border: 1px solid var(--color-podcast); border-radius: var(--radius-lg); z-index: -1; opacity: 0.45; }
+  .pod-eyebrow { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-podcast); margin-bottom: 0.6rem; }
+  .pod-intro h1 { font-family: var(--font-display); font-size: clamp(2.2rem, 4.5vw, 3rem); font-weight: 600; line-height: 1.05; letter-spacing: -0.015em; margin-bottom: 0.75rem; }
+  .pod-tagline { font-family: var(--font-display); font-size: 1.25rem; color: var(--color-text); line-height: 1.4; margin-bottom: 1rem; }
+  .pod-text { color: var(--color-text-secondary); font-size: 1rem; line-height: 1.75; max-width: 52ch; }
+  .pod-episodes__title { font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; margin-bottom: 1.5rem; }
+  .pod-episodes__list { display: flex; flex-direction: column; gap: 1.75rem; }
+  .pod-soon { text-align: center; padding: 3rem 1rem; background: var(--color-podcast-tint); border: 1px solid var(--color-border); border-radius: var(--radius-lg); }
+  .pod-soon__dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--color-podcast); margin-bottom: 1rem; }
+  .pod-soon__label { font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-podcast); margin-bottom: 0.6rem; }
+  .pod-soon__text { color: var(--color-text-secondary); font-size: 0.98rem; line-height: 1.7; max-width: 46ch; margin: 0 auto; }
+  @media (max-width: 720px) { .pod-hero { grid-template-columns: 1fr; gap: 1.75rem; } .pod-art { max-width: 280px; } .pod-art::after { inset: 10px -10px -10px 10px; } }
 </style>

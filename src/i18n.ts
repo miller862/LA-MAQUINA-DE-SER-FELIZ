@@ -8,7 +8,7 @@ export const ui = {
     'nav.podcast':        'Podcast',
     'nav.sobre':          'Sobre mí',
     'home.subtitle':      'Politólogo · Data Scientist',
-    'home.intro':         'Escribo sobre política, datos y las ideas que me obsesionan.',
+    'home.intro':         'Un lugar para pensar con otros. Y si incomoda, mejor',
     'home.all':           'Todo',
     'home.latest':        'Últimas entradas',
     'home.readMore':      'Leer más',
@@ -20,6 +20,12 @@ export const ui = {
     'coming.text':        'Esta sección está en construcción.',
     'about.title':        'Sobre mí',
     'footer.rights':      'Todos los derechos reservados.',
+    'podcast.name':       'La Máquina de Ser Feliz',
+    'podcast.tagline':    'Un podcast sobre política, ideas y la vida examinada.',
+    'podcast.intro':      'Conversaciones largas y sin apuro sobre lo que nos toca pensar: la cosa pública, la filosofía cotidiana y las preguntas que no se dejan responder rápido.',
+    'podcast.soon.label': 'Primer episodio en camino',
+    'podcast.soon.text':  'Estoy preparando los primeros episodios. Mientras tanto, podés seguirme en LinkedIn para enterarte cuando salga.',
+    'podcast.episodes':   'Episodios',
   },
   en: {
     'nav.blog':           'Blog',
@@ -28,7 +34,7 @@ export const ui = {
     'nav.podcast':        'Podcast',
     'nav.sobre':          'About',
     'home.subtitle':      'Political Scientist · Data Scientist',
-    'home.intro':         'I write about politics, data, and the ideas that obsess me.',
+    'home.intro':         "A place to think with others. And if it's uncomfortable, even better.",
     'home.all':           'All',
     'home.latest':        'Latest entries',
     'home.readMore':      'Read more',
@@ -40,6 +46,12 @@ export const ui = {
     'coming.text':        'This section is under construction.',
     'about.title':        'About me',
     'footer.rights':      'All rights reserved.',
+    'podcast.name':       'La Máquina de Ser Feliz',
+    'podcast.tagline':    'A podcast on politics, ideas, and the examined life.',
+    'podcast.intro':      'Long, unhurried conversations about what we are called to think through: public life, everyday philosophy, and the questions that resist quick answers.',
+    'podcast.soon.label': 'First episode on its way',
+    'podcast.soon.text':  'I am putting together the first episodes. In the meantime, follow me on LinkedIn to hear when it drops.',
+    'podcast.episodes':   'Episodes',
   },
 } as const;
 
@@ -60,7 +72,6 @@ export function getOppositeLocale(lang: Lang): Lang {
   return lang === 'es' ? 'en' : 'es';
 }
 
-// Segment translation map: es → en and en → es
 const segmentMap: Record<string, Record<Lang, string>> = {
   'pensamiento':      { es: 'pensamiento',      en: 'thinking' },
   'thinking':         { es: 'pensamiento',      en: 'thinking' },
@@ -72,9 +83,7 @@ const segmentMap: Record<string, Record<Lang, string>> = {
 };
 
 export function localizedPath(lang: Lang, path: string): string {
-  // Strip the /en prefix if present
   const clean = path.replace(/^\/(es|en)/, '') || '/';
-  // Translate each segment
   const translated = clean.replace(/^\/([^/]+)/, (_, seg) => {
     const mapped = segmentMap[seg];
     return mapped ? `/${mapped[lang]}` : `/${seg}`;

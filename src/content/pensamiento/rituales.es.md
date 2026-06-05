@@ -1,7 +1,7 @@
 ---
 title: "Por qué deberían preocuparnos la desaparición de los rituales"
 date: "2026-06-01"
-description: "Inspirado en Byung-Chul Han, una reflexión sobre el tiempo, los rituales y lo que perdemos cuando dejamos de cerrar etapas."
+description: "No todo lo que es oro brilla. Hay un riesgo que corremos de llegar al final de nuestra historia sin habernos detenido a hacer habitable el tiempo."
 tags: ["Filosofía", "Política", "Byung-Chul Han"]
 cover: "/img/linea_curva.svg"
 lang: es

@@ -4,94 +4,72 @@ import { t } from '../i18n';
 ---
 
 <Base lang="es" title={t('es', 'about.title')}>
-  <div class="about-page">
-    <div class="about-avatar">
-      <!-- Reemplazá con tu foto: <img src="/img/manuel.jpg" alt="Manuel Miller" class="avatar-img" /> -->
-      <div class="avatar-placeholder">MM</div>
+  <div class="about">
+    <header class="about-hero">
+      <div class="about-portrait">
+        <img src="/img/fotopersonal.jpg" alt="Manuel Miller" loading="eager" />
+        <span class="about-portrait__accent" aria-hidden="true"></span>
+      </div>
+      <div class="about-heading">
+        <p class="about-eyebrow">Politólogo · Data Scientist · Buenos Aires</p>
+        <h1>Manuel Miller</h1>
+        <ul class="about-credentials">
+          <li>
+            <span class="cred-degree">Ciencia Política</span>
+            <span class="cred-inst">Universidad de Buenos Aires (UBA)</span>
+          </li>
+          <li>
+            <span class="cred-degree">Maestría en Generación y Análisis de Información Estadística</span>
+            <span class="cred-inst">Universidad de Tres de Febrero (UNTREF)</span>
+          </li>
+        </ul>
+      </div>
+    </header>
+
+    <div class="about-body prose">
+      <p>Argentino y entrerriano en ese orden.</p>
+      <p>Soy un cientifico de datos en la practica, con titulo de politologo en lo formal. Creo en el aprovechamiento de los datos para el diseño de politicas publicas que beneficien a la ciudadanía.</p>
+      <p>Me desempeño en el sector privado como analista en estrategia para marcas y enseño un poco de programación y estadística en la carrera de Ciencia política de mi querida facultad de Ciencias Sociales (UBA).</p>
+      <p>Diseñé este sitio para compartir las ideas que reflexiono a diario y me gustaria compartir con todos ustedes.</p>
     </div>
 
-    <div class="about-content">
-      <h1>Manuel Miller</h1>
-      <p class="about-subtitle">Politólogo · Data Scientist · Buenos Aires</p>
-
-      <div class="about-body">
-        <p>Empecé estudiando política porque quería entender por qué las cosas son como son. Terminé aprendiendo a programar porque los datos me parecieron la herramienta más honesta para hacerme esa pregunta.</p>
-        <p>Trabajo en la intersección entre ciencias sociales y análisis de datos: elecciones, opinión pública, comunicación política. En este sitio escribo sobre lo que me obsesiona, lo que me confunde y lo que voy aprendiendo.</p>
-        <p>Si algo resuena, hablemos.</p>
-      </div>
-
-      <div class="about-links">
-        <a href="https://www.linkedin.com/in/manuel-miller/" target="_blank" rel="noopener noreferrer" class="about-btn about-btn--linkedin">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
-          LinkedIn
-        </a>
-
-        <a href="https://github.com/miller862" target="_blank" rel="noopener noreferrer" class="about-btn about-btn--github">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.34-3.369-1.34-.454-1.154-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.268 2.75 1.026A9.578 9.578 0 0 1 12 6.836a9.59 9.59 0 0 1 2.504.337c1.909-1.294 2.747-1.026 2.747-1.026.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.741 0 .267.18.579.688.481C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
-          GitHub
-        </a>
-
-        <a href="mailto:mamiller862@gmail.com" class="about-btn about-btn--mail">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-          mamiller862@gmail.com
-        </a>
-      </div>
+    <div class="about-links">
+      <a href="https://www.linkedin.com/in/manuel-miller/" target="_blank" rel="noopener noreferrer" class="about-btn about-btn--linkedin">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        LinkedIn
+      </a>
+      <a href="https://github.com/miller862" target="_blank" rel="noopener noreferrer" class="about-btn about-btn--github">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.34-3.369-1.34-.454-1.154-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.268 2.75 1.026A9.578 9.578 0 0 1 12 6.836a9.59 9.59 0 0 1 2.504.337c1.909-1.294 2.747-1.026 2.747-1.026.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.741 0 .267.18.579.688.481C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
+        GitHub
+      </a>
+      <a href="mailto:mamiller862@gmail.com" class="about-btn about-btn--mail">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        mamiller862@gmail.com
+      </a>
     </div>
   </div>
 </Base>
 
 <style>
-  .about-page {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 3rem;
-    padding: 4rem 0;
-    align-items: start;
-    max-width: 720px;
-  }
-
-  .avatar-placeholder {
-    width: 110px; height: 110px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.4rem; font-weight: 700; color: white;
-    font-family: var(--font-display);
-    flex-shrink: 0;
-  }
-  .avatar-img { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; }
-
-  .about-content { display: flex; flex-direction: column; gap: 0.85rem; }
-
-  h1 { font-size: 2rem; }
-  .about-subtitle { font-size: 0.85rem; color: var(--color-primary); letter-spacing: 0.06em; font-weight: 600; text-transform: uppercase; }
-
-  .about-body p { color: var(--color-text-secondary); margin-bottom: 0.85rem; font-size: 0.975rem; line-height: 1.75; }
-
-  .about-links { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.5rem; }
-
-  .about-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.45rem 1rem;
-    border-radius: var(--radius-full);
-    font-size: 0.85rem;
-    font-weight: 600;
-    border: 1px solid var(--color-border);
-    background: var(--color-bg-surface);
-    color: var(--color-text-secondary);
-    transition: all var(--transition-fast);
-    text-decoration: none;
-  }
+  .about { max-width: 760px; margin: 0 auto; padding: 3.5rem 0 5rem; }
+  .about-hero { display: grid; grid-template-columns: auto 1fr; gap: 2.25rem; align-items: center; padding-bottom: 2.25rem; margin-bottom: 2.25rem; border-bottom: 1px solid var(--color-border); }
+  .about-portrait { position: relative; width: 150px; height: 150px; flex-shrink: 0; }
+  .about-portrait img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-lg); display: block; box-shadow: var(--shadow-card); }
+  .about-portrait__accent { position: absolute; inset: 12px -12px -12px 12px; border: 1px solid var(--color-accent); border-radius: var(--radius-lg); z-index: -1; opacity: 0.5; }
+  .about-eyebrow { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-text-muted); margin-bottom: 0.5rem; }
+  .about-heading h1 { font-family: var(--font-display); font-size: clamp(2.1rem, 4vw, 2.75rem); font-weight: 600; line-height: 1.05; letter-spacing: -0.01em; margin-bottom: 1rem; }
+  .about-credentials { list-style: none; display: flex; flex-direction: column; gap: 0.55rem; }
+  .about-credentials li { display: flex; flex-direction: column; gap: 0.1rem; padding-left: 0.85rem; border-left: 2px solid var(--color-border-light); }
+  .cred-degree { font-size: 0.92rem; font-weight: 500; color: var(--color-text); line-height: 1.3; }
+  .cred-inst { font-size: 0.82rem; color: var(--color-text-muted); line-height: 1.3; }
+  .about-body { max-width: 64ch; }
+  .about-body p { color: var(--color-text-secondary); margin-bottom: 1.1rem; font-size: 1.02rem; line-height: 1.8; }
+  .about-body p:first-child { font-family: var(--font-display); font-size: 1.35rem; line-height: 1.5; color: var(--color-text); margin-bottom: 1.4rem; }
+  .about-links { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 2.5rem; padding-top: 2rem; border-top: 1px solid var(--color-border); }
+  .about-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1.05rem; border-radius: var(--radius-full); font-size: 0.85rem; font-weight: 500; border: 1px solid var(--color-border); background: var(--color-bg-surface); color: var(--color-text-secondary); transition: all var(--transition-fast); text-decoration: none; }
   .about-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
-
   .about-btn--linkedin:hover { color: #0A66C2; border-color: #0A66C2; background: rgba(10,102,194,0.08); }
-  .about-btn--github:hover   { color: var(--color-text); border-color: var(--color-text); background: var(--color-bg-hover); }
-  .about-btn--mail:hover     { color: var(--color-primary); border-color: var(--color-primary); background: color-mix(in srgb, var(--color-primary) 8%, transparent); }
-
-  @media (max-width: 600px) {
-    .about-page { grid-template-columns: 1fr; }
-    .avatar-placeholder, .avatar-img { margin: 0 auto; }
-  }
+  .about-btn--github:hover { color: var(--color-text); border-color: var(--color-text); background: var(--color-bg-hover); }
+  .about-btn--mail:hover { color: var(--color-primary); border-color: var(--color-primary); background: color-mix(in srgb, var(--color-primary) 8%, transparent); }
+  @media (max-width: 600px) { .about-hero { grid-template-columns: 1fr; gap: 1.5rem; text-align: left; } .about-portrait { width: 120px; height: 120px; } }
 </style>

@@ -1,7 +1,7 @@
 ---
 title: "Why should we worry about the disappearance of rituals"
 date: "2026-06-01"
-description: "Inspired by Byung-Chul Han, a reflection on time, rituals, and what we lose when we stop closing chapters."
+description: "The risk we are taking by not stopping to make time habitable"
 tags: ["Philosophy", "Politics", "Byung-Chul Han"]
 cover: "/img/linea_curva.svg"
 lang: en

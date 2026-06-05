@@ -1,15 +1,16 @@
 ---
 import Base from '../../layouts/Base.astro';
 import PodcastPlayer from '../../components/PodcastPlayer.astro';
-import { getCollection } from 'astro:content';
+import { getCollection, render } from 'astro:content';
+import { isPublished } from '../../content/visibility';
 
 export async function getStaticPaths() {
-  const entries = await getCollection('ciencia-de-datos', e => e.data.lang === 'es' && !e.data.draft);
+  const entries = await getCollection('ciencia-de-datos', e => e.data.lang === 'es' && isPublished(e));
   return entries.map(e => ({ params: { slug: e.data.postId }, props: { entry: e } }));
 }
 
 const { entry } = Astro.props;
-const { Content } = await entry.render();
+const { Content } = await render(entry);
 ---
 
 <Base lang="es" title={entry.data.title} description={entry.data.description}>

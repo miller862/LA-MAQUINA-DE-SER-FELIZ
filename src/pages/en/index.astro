@@ -4,12 +4,13 @@ import PostCard from '../../components/PostCard.astro';
 import TagMultiSelect from '../../components/TagMultiSelect.astro';
 import { getCollection } from 'astro:content';
 import { t } from '../../i18n';
+import { isPublished } from '../../content/visibility';
 
 const lang = 'en';
 
-const pensamiento  = await getCollection('pensamiento',      e => e.data.lang === 'en' && !e.data.draft);
-const datos        = await getCollection('ciencia-de-datos', e => e.data.lang === 'en' && !e.data.draft);
-const podcast      = await getCollection('podcast',          e => e.data.lang === 'en' && !e.data.draft);
+const pensamiento  = await getCollection('pensamiento',      e => e.data.lang === 'en' && isPublished(e));
+const datos        = await getCollection('ciencia-de-datos', e => e.data.lang === 'en' && isPublished(e));
+const podcast      = await getCollection('podcast',          e => e.data.lang === 'en' && isPublished(e));
 
 const allEntries = [
   ...pensamiento.map(e => ({ ...e, vertical: 'pensamiento'      as const })),
@@ -21,10 +22,10 @@ const allTags = [...new Set(allEntries.flatMap(e => e.data.tags))].sort();
 
 const verticals = [
   { key: 'pensamiento', title: 'Thinking',     subtitle: 'Politics · Philosophy · Current affairs',
-    desc: 'Opinion pieces and reflections on public matters and the ideas behind them.',
+    desc: 'Some everyday reflections to keep from being indifferent to reality.',
     count: pensamiento.length + podcast.length },
   { key: 'data', title: 'Data Science', subtitle: 'Analysis · Models · Data',
-    desc: 'Projects and explorations with data: from clean code to honest inference.',
+    desc: 'A place to tell ideas through data and share my latest projects.',
     count: datos.length },
 ];
 ---

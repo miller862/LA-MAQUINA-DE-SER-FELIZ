@@ -1,0 +1,78 @@
+<svg viewBox="0 0 900 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="bg-grid" width="30" height="30" patternUnits="userSpaceOnUse">
+      <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#162216" stroke-width="0.8"/>
+    </pattern>
+    <filter id="txt-glow" x="-20%" y="-40%" width="140%" height="180%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="txt-glow2" x="-20%" y="-40%" width="140%" height="180%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="900" height="200" fill="#0a0f0a"/>
+  <rect width="900" height="200" fill="url(#bg-grid)"/>
+
+  <!-- Glow ambiental -->
+  <ellipse cx="450" cy="100" rx="320" ry="80" fill="#00ff41" opacity="0.025"/>
+
+  <!-- Caracteres decorativos fondo -->
+  <text x="20" y="40" font-family="monospace" font-size="10" fill="#1a3a1a" opacity="0.6">01001100 11010011</text>
+  <text x="700" y="170" font-family="monospace" font-size="10" fill="#1a3a1a" opacity="0.6">10110100 01101001</text>
+  <text x="16" y="168" font-family="monospace" font-size="9" fill="#0e2a0e" opacity="0.8">{"marca":"coca cola","clave":5}</text>
+  <text x="620" y="28" font-family="monospace" font-size="9" fill="#0e2a0e" opacity="0.8">batch_4/12 ██████░░░░</text>
+
+  <!-- Título principal -->
+  <!-- sombra de glow -->
+  <text x="450" y="96" text-anchor="middle" font-family="'Courier New', Courier, monospace" font-size="54" font-weight="900" letter-spacing="6" fill="#00ff41" filter="url(#txt-glow)" opacity="0.22">CODIFICADOR</text>
+  <!-- texto real -->
+  <text x="450" y="96" text-anchor="middle" font-family="'Courier New', Courier, monospace" font-size="54" font-weight="900" letter-spacing="6" fill="#00ff41" filter="url(#txt-glow2)">CODIFICADOR</text>
+
+  <!-- Subtítulo -->
+  <text x="450" y="128" text-anchor="middle" font-family="'Courier New', Courier, monospace" font-size="14" letter-spacing="10" fill="#4ade80" opacity="0.75">DE PREGUNTAS ABIERTAS</text>
+
+  <!-- Línea separadora -->
+  <line x1="100" y1="148" x2="800" y2="148" stroke="#00ff41" stroke-width="0.8" opacity="0.25"/>
+
+  <!-- Píxeles decorativos izquierda (space invader) -->
+  <rect x="52" y="74" width="5" height="5" fill="#00ff41" opacity="0.7"/>
+  <rect x="62" y="69" width="5" height="5" fill="#00ff41" opacity="0.7"/>
+  <rect x="47" y="69" width="5" height="5" fill="#00ff41" opacity="0.7"/>
+  <rect x="52" y="64" width="5" height="5" fill="#00ff41" opacity="0.9"/>
+  <rect x="57" y="64" width="5" height="5" fill="#00ff41" opacity="0.9"/>
+  <rect x="62" y="64" width="5" height="5" fill="#00ff41" opacity="0.7"/>
+  <rect x="47" y="64" width="5" height="5" fill="#00ff41" opacity="0.7"/>
+  <rect x="52" y="59" width="12" height="5" fill="#00ff41" opacity="0.4"/>
+
+  <!-- Píxeles decorativos derecha -->
+  <rect x="836" y="74" width="5" height="5" fill="#00ff41" opacity="0.7"/>
+  <rect x="846" y="69" width="5" height="5" fill="#00ff41" opacity="0.7"/>
+  <rect x="831" y="69" width="5" height="5" fill="#00ff41" opacity="0.7"/>
+  <rect x="836" y="64" width="5" height="5" fill="#00ff41" opacity="0.9"/>
+  <rect x="841" y="64" width="5" height="5" fill="#00ff41" opacity="0.9"/>
+  <rect x="846" y="64" width="5" height="5" fill="#00ff41" opacity="0.7"/>
+  <rect x="831" y="64" width="5" height="5" fill="#00ff41" opacity="0.7"/>
+  <rect x="836" y="59" width="12" height="5" fill="#00ff41" opacity="0.4"/>
+
+  <!-- Tag chips -->
+  <rect x="256" y="160" width="60" height="20" rx="10" fill="#0d200d" stroke="#1e4a1e" stroke-width="0.9"/>
+  <text x="286" y="174" text-anchor="middle" font-family="monospace" font-size="9" fill="#4ade80">Python</text>
+
+  <rect x="326" y="160" width="50" height="20" rx="10" fill="#0d200d" stroke="#1e4a1e" stroke-width="0.9"/>
+  <text x="351" y="174" text-anchor="middle" font-family="monospace" font-size="9" fill="#4ade80">GPT-4o</text>
+
+  <rect x="386" y="160" width="56" height="20" rx="10" fill="#0d200d" stroke="#1e4a1e" stroke-width="0.9"/>
+  <text x="414" y="174" text-anchor="middle" font-family="monospace" font-size="9" fill="#4ade80">pandas</text>
+
+  <rect x="452" y="160" width="40" height="20" rx="10" fill="#0d200d" stroke="#1e4a1e" stroke-width="0.9"/>
+  <text x="472" y="174" text-anchor="middle" font-family="monospace" font-size="9" fill="#4ade80">NLP</text>
+
+  <rect x="502" y="160" width="72" height="20" rx="10" fill="#0d200d" stroke="#1e4a1e" stroke-width="0.9"/>
+  <text x="538" y="174" text-anchor="middle" font-family="monospace" font-size="9" fill="#4ade80">openpyxl</text>
+
+  <rect x="584" y="160" width="60" height="20" rx="10" fill="#0d200d" stroke="#1e4a1e" stroke-width="0.9"/>
+  <text x="614" y="174" text-anchor="middle" font-family="monospace" font-size="9" fill="#4ade80">Parquet</text>
+</svg>

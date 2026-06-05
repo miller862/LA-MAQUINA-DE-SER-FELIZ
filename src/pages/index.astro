@@ -4,12 +4,13 @@ import PostCard from '../components/PostCard.astro';
 import TagMultiSelect from '../components/TagMultiSelect.astro';
 import { getCollection } from 'astro:content';
 import { t } from '../i18n';
+import { isPublished } from '../content/visibility';
 
 const lang = 'es';
 
-const pensamiento = await getCollection('pensamiento',      e => e.data.lang === 'es' && !e.data.draft);
-const datos       = await getCollection('ciencia-de-datos', e => e.data.lang === 'es' && !e.data.draft);
-const podcast     = await getCollection('podcast',          e => e.data.lang === 'es' && !e.data.draft);
+const pensamiento = await getCollection('pensamiento',      e => e.data.lang === 'es' && isPublished(e));
+const datos       = await getCollection('ciencia-de-datos', e => e.data.lang === 'es' && isPublished(e));
+const podcast     = await getCollection('podcast',          e => e.data.lang === 'es' && isPublished(e));
 
 const allEntries = [
   ...pensamiento.map(e => ({ ...e, vertical: 'pensamiento'      as const })),
@@ -24,14 +25,14 @@ const verticals = [
     key: 'pensamiento',
     title: 'Pensamiento',
     subtitle: 'Política · Filosofía · Coyuntura',
-    desc: 'Notas de opinión y reflexión sobre la cosa pública y las ideas que la sostienen.',
+    desc: 'Algunas reflexiones cotidianas para no ser indiferentes a la realidad.',
     count: pensamiento.length + podcast.length, // podcast convive
   },
   {
     key: 'data',
     title: 'Ciencia de Datos',
     subtitle: 'Análisis · Modelos · Datos',
-    desc: 'Proyectos y exploraciones con datos: del código limpio a la inferencia honesta.',
+    desc: 'Un lugar para narrar ideas a través de datos y compartir mis últimos proyectos',
     count: datos.length,
   },
 ];
