@@ -75,7 +75,13 @@ const canonicalTagKeys = tags.map(tagKey).join(',');
 
   {showPodcastPanel && (
     <div class="card-podcast-panel">
-      <PodcastPlayer episodeUrl={podcastEpisodeUrl} compact={true} title={title} />
+      <a href={href} class="pod-cta" aria-label={`Escuchar episodio: ${title}`}>
+        <div class="pod-cta__art">
+          <span class="pod-cta__ring"></span>
+          <span class="pod-cta__icon">▶</span>
+        </div>
+        <span class="pod-cta__label">Escuchar<br/>episodio</span>
+      </a>
     </div>
   )}
 </article>
@@ -257,13 +263,67 @@ const canonicalTagKeys = tags.map(tagKey).join(',');
     padding: 0.85rem 1.25rem;
     background: linear-gradient(90deg, var(--color-bg-surface) 0%, var(--color-podcast-tint) 100%);
     border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  /* En pantallas grandes: tarjeta se divide — contenido a la izquierda, podcast a la derecha */
+  /* CTA de escucha */
+  .pod-cta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    text-decoration: none;
+    color: var(--color-podcast);
+    padding: 0.5rem;
+  }
+  .pod-cta__art {
+    position: relative;
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .pod-cta__ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid var(--color-podcast);
+    opacity: 0.5;
+    transition: transform var(--transition-normal), opacity var(--transition-normal);
+  }
+  .pod-cta:hover .pod-cta__ring {
+    transform: scale(1.18);
+    opacity: 0.9;
+  }
+  .pod-cta__icon {
+    font-size: 1.3rem;
+    line-height: 1;
+    transition: transform var(--transition-fast);
+  }
+  .pod-cta:hover .pod-cta__icon {
+    transform: scale(1.15);
+  }
+  .pod-cta__label {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-align: center;
+    line-height: 1.4;
+    opacity: 0.8;
+    transition: opacity var(--transition-fast);
+  }
+  .pod-cta:hover .pod-cta__label { opacity: 1; }
+
+  /* En pantallas grandes: columna lateral derecha */
   @media (min-width: 860px) {
     .post-card.has-podcast {
       display: grid;
-      grid-template-columns: 1fr 200px;
+      grid-template-columns: 1fr 130px;
       grid-template-rows: 1fr;
     }
     .post-card.has-podcast > a.card-link {
@@ -277,10 +337,12 @@ const canonicalTagKeys = tags.map(tagKey).join(',');
       border-left: 1px dashed var(--color-podcast);
       border-radius: 0 var(--radius-xl) var(--radius-xl) 0;
       background: linear-gradient(180deg, var(--color-bg-surface) 0%, var(--color-podcast-tint) 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1.5rem 1rem;
+      flex-direction: column;
+      padding: 1.5rem 0.75rem;
+    }
+    /* En desktop el CTA se orienta verticalmente */
+    .post-card.has-podcast .pod-cta {
+      flex-direction: column;
     }
   }
 </style>

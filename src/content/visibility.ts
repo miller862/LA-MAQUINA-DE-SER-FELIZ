@@ -10,7 +10,7 @@
 //   ]);
 
 export const hiddenPostIds = new Set<string>([
-  // 'postId-a-ocultar',
+  'codificador-preguntas-abiertas',
 ]);
 
 // Devuelve true si la entrada debe mostrarse (no está en draft ni oculta por postId).

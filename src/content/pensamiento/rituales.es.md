@@ -2,11 +2,11 @@
 title: "Por qué deberían preocuparnos la desaparición de los rituales"
 date: "2026-06-01"
 description: "No todo lo que es oro brilla. Hay un riesgo que corremos de llegar al final de nuestra historia sin habernos detenido a hacer habitable el tiempo."
-tags: ["Filosofía", "Política", "Byung-Chul Han"]
+tags: ["filosofia", "politica"]
 cover: "/img/linea_curva.svg"
 lang: es
 postId: rituales
-podcastEpisodeUrl: ""
+podcastEpisodeUrl: "https://player.rss.com/la-maquina-de-ser-feliz/2905651?theme=dark&v=2"
 ---
 
 ## Sí, este blog comienza inspirado por Byung Chul-Han.

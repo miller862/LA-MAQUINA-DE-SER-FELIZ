@@ -26,30 +26,35 @@ export const verticals = {
 // Cada tag tiene UN color, identificado por una CLAVE CANÓNICA (slug).
 // El mismo tag en cualquier idioma cae sobre la misma clave gracias a aliases.
 
+// ─── LISTA CANÓNICA DE TAGS ────────────────────────────────────────────────────
+// Esta es la lista FINITA y autorizada. Solo estas claves producen color.
+// Para agregar o quitar un tag, editá aquí (y actualizá tagAliases si hace falta).
 export const tagPalette: Record<string, { bg: string; fg: string }> = {
   politica:         { bg: '#4C5BAA', fg: '#fff' },   // índigo
   filosofia:        { bg: '#6A6E9E', fg: '#fff' },   // índigo-gris
-  coyuntura:        { bg: '#856A42', fg: '#fff' },   // ocre apagado
   economia:         { bg: '#3F7558', fg: '#fff' },   // verde apagado
   'opinion-publica':{ bg: '#875A79', fg: '#fff' },   // malva
   'relaciones internacionales': { bg: '#4A6E9A', fg: '#fff' },
   nlp:              { bg: '#2F7E7E', fg: '#fff' },   // teal
   python:           { bg: '#3A6E8A', fg: '#fff' },
   ml:               { bg: '#326F6F', fg: '#fff' },
-  datos:            { bg: '#2F7E7E', fg: '#fff' },
+  ia:               { bg: '#5B5EA6', fg: '#fff' },   // violeta IA
+  estadistica:      { bg: '#4A7C6F', fg: '#fff' },   // verde-gris
   podcast:          { bg: '#9A5B3B', fg: '#fff' },   // terracota
 };
 
-// Aliases: variantes en cualquier idioma → clave canónica
+// Aliases: variantes en cualquier idioma → clave canónica del tagPalette
+// Si un tag del frontmatter no está aquí ni en tagPalette → fallback gris
 const tagAliases: Record<string, string> = {
-  'politics':         'politica',
-  'philosophy':       'filosofia',
-  'current affairs':  'coyuntura',
-  'economy':          'economia',
-  'international relations': 'relaciones internacionales',
-  'public opinion':   'opinion-publica',
-  'machine learning': 'ml',
-  'data':             'datos',
+  'politics':               'politica',
+  'philosophy':             'filosofia',
+  'economy':                'economia',
+  'international relations':'relaciones internacionales',
+  'public opinion':         'opinion-publica',
+  'machine learning':       'ml',
+  'artificial intelligence':'ia',
+  'statistics':             'estadistica',
+  'llm':                    'nlp',
 };
 
 // Normaliza: lowercase, sin acentos, sin espacios extra

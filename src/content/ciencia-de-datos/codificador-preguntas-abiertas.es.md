@@ -1,8 +1,8 @@
 ---
-title: "Codificador de preguntas abiertas con LLM"
-date: "2025-06-04"
-description: "Cómo construí una herramienta en Python que usa GPT-4o para resolver uno de los problemas más tediosos de la investigación cuantitativa: convertir respuestas de texto libre en datos analizables."
-tags: ["Python", "LLM", "NLP", "investigación de mercado", "data science"]
+title: "Codificando respuestas abiertas con procesamiento de lenguaje natural y modelos de lenguaje"
+date: "2025-06-18"
+description: ""
+tags: ["python", "nlp", "ia"]
 lang: "es"
 postId: "codificador-preguntas-abiertas"
 cover: "/img/cover-codificador.svg"
@@ -13,21 +13,21 @@ draft: false
   <img src="/img/banner-codificador.svg" alt="Codificador de preguntas abiertas" style="width:100%;display:block;height:auto;" />
 </div>
 
-En investigación cuantitativa, las preguntas abiertas son el ingrediente incómodo. Todo el resto del cuestionario produce números directamente: escalas de 1 a 10, opciones múltiples, net promoter scores. Pero las preguntas abiertas producen texto libre, y el texto libre no entra en una regresión ni en un crosstab.
+En investigación cuantitativa todos odiamos las preguntas abiertas. Sin embargo de todos los usarios que intervienen en el proceso de una encuesta, el que mas las odia es probablemente el encargado de codificar las respuestas.
 
-Para convertirlas en datos, existe un proceso que se llama **codificación**: alguien lee todas las respuestas, agrupa las que dicen lo mismo, asigna un número a cada grupo, y reemplaza el texto por ese número en la base de datos. "Hellmanns", "la de tapa amarilla" y "hellmans (sic)" se convierten todas en el código 5, que corresponde a Hellmann's.
+Para convertirlas en datos, existe un proceso que se llama **codificación**: alguien lee todas las respuestas, agrupa las que dicen lo mismo, asigna un número a cada grupo, y reemplaza el texto por ese número en la base de datos. "Hellmanns", "Jelman" y "hellmans" se agrupan bajo un mismo codigo, que corresponde a Hellmann's.
 
-Es un trabajo tedioso, repetitivo y propenso a errores de consistencia. Y cuando se trata de miles de respuestas a múltiples preguntas para varios proyectos corriendo en paralelo, es también caro. Decidí automatizarlo.
+Es un trabajo tedioso, repetitivo y propenso a errores de consistencia. Y cuando se trata de miles de respuestas a múltiples preguntas para varios proyectos corriendo en paralelo, es también caro e ineficiente. Decidí automatizarlo.
 
 ---
 
 ## El problema en toda su complejidad
 
-Antes de escribir una sola línea de código, tuve que entender bien el problema. Hay dos situaciones fundamentalmente distintas:
+ Hay dos situaciones fundamentalmente distintas ante cualquier pregunta abierta:
 
-**Cuando ya existe un libro de códigos.** En estudios longitudinales, paneles o proyectos con múltiples olas, alguien ya definió las categorías en una vuelta anterior. Hay un archivo Excel —el libro de códigos, o LDC— con una lista de claves numéricas y los valores canónicos que les corresponden. La tarea aquí es *imputar*: tomar cada respuesta nueva y mapearla a la clave correcta. El desafío principal es la variabilidad ortográfica. "Cocca-cola", "coca cola", "CocaCola" y "la negra" son todas la clave 7.
+**Cuando ya existe un libro de códigos.** En estudios longitudinales, paneles o proyectos con múltiples olas, alguien ya definió las categorías en una medición anterior. Hay un archivo —el libro de códigos— con una lista de claves numéricas y los valores canónicos que les corresponden. La tarea aquí es *imputar*: tomar cada respuesta nueva y mapearla a la clave correcta. El desafío principal es la variabilidad ortográfica. "Cocca-cola", "coca cola", "CocaCola" y "la negra" corresponden todas a una misma clave.
 
-**Cuando no existe ningún libro de códigos.** En estudios nuevos o preguntas que nunca se habían hecho, hay que *inventar* las categorías desde cero. El analista no sabe de antemano qué va a encontrar. Primero hay que descubrir qué categorías emergen de los datos, luego asignar cada respuesta a alguna, y finalmente generar un LDC reutilizable para futuras olas.
+**Cuando no existe ningún libro de códigos.** En estudios nuevos o preguntas que nunca se habían hecho, hay que *Codificar* las categorías desde cero. El analista no sabe de antemano qué va a encontrar. Primero hay que descubrir qué categorías emergen de los datos, luego asignar cada respuesta a alguna, y finalmente generar un Libro de codigos escalable (En casso de que se repita el estudio).
 
 Ambos flujos comparten infraestructura pero tienen lógicas completamente distintas.
 
@@ -35,19 +35,17 @@ Ambos flujos comparten infraestructura pero tienen lógicas completamente distin
 
 ## Un problema que nadie menciona: la respuesta multi-valor
 
-Hay un tercer problema que no está en los manuales pero aparece todo el tiempo.
+Hay un tercer que aparece todo el tiempo.
 
 Imaginá una pregunta: *"¿Qué cualidades debería tener un buen jugador de fútbol?"*. Un encuestado responde: *"Velocidad, técnica y garra"*. Otro: *"La actitud y el compromiso con el equipo"*.
 
 El primero mencionó tres cosas. El segundo mencionó dos. Pero en el archivo de datos, ambas ocupan una sola celda. Si codificamos esa celda como una unidad, perdemos menciones. En un estudio de imagen de marca o de atributos de producto, esas menciones perdidas pueden cambiar los resultados.
 
-La solución es la **expansión ad-hoc**: detectar cuándo una respuesta contiene múltiples menciones reales, dividirlas, y distribuirlas en columnas adicionales. La columna original (`P23`) se queda con la primera mención (top of mind), y se crean columnas nuevas (`P23adhoc2`, `P23adhoc3`, etc.) para las siguientes. La detección no puede ser solo por regex —una coma puede separar menciones o puede ser parte de una frase narrativa— por eso la decisión final la toma el LLM.
+La solución que desarrollé es la **expansión ad-hoc**: detectar cuándo una respuesta contiene múltiples menciones reales, dividirlas, y distribuirlas en columnas adicionales. La columna original (`P23`) se queda con la primera mención (top of mind), y se crean columnas nuevas (`P23adhoc2`, `P23adhoc3`, etc.) para las siguientes. La detección no puede ser solo por regex —una coma puede separar menciones o puede ser parte de una frase narrativa— por eso la decisión final la toma un Modelo de lenguaje entreado para estas situaciones.
 
 ---
 
 ## La arquitectura
-
-El orquestador (`main.py`) coordina todo: carga el archivo, detecta las preguntas, presenta el menú y llama a los flujos. Los módulos de procesamiento implementan cada modo. La capa de I/O maneja todo lo que toca disco. Hay módulos de soporte para normalización de texto, comunicación con la API y la interfaz de terminal.
 
 <svg viewBox="0 0 600 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;display:block;margin:1.5rem auto;">
   <rect width="600" height="120" fill="none"/>
@@ -82,11 +80,11 @@ proyectos/
     REFUERZOS/     ← variaciones aprendidas
     outputs/       ← resultados + checkpoints
   PROYECTO_B/
-    APP/           ← subproyecto
-    SC/            ← otro subproyecto
+    subproyecto_a/           
+    subproyecto_b/            
 ```
 
-Los subproyectos se detectan automáticamente. Si los archivos siguen el patrón `PROYECTO1.xlsx`, `PROYECTO2.xlsx`, también pregunta el número de ola. Cada proyecto puede tener sus propios códigos especiales (en algunos estudios "OTRO" es 99, en otros es 88) configurados en un JSON central.
+Los subproyectos se detectan automáticamente. Si los archivos siguen el patrón `PROYECTO1.xlsx`, `PROYECTO2.xlsx`, también pregunta el número de ola. Cada proyecto puede tener sus propios códigos especiales.
 
 ---
 
@@ -209,5 +207,3 @@ Lo que el LLM hace es eliminar el trabajo mecánico. Lo que el analista hace es 
 ## Resultado en producción
 
 Una base con 1.500 respuestas a 4 preguntas abiertas que antes tomaba entre 4 y 6 horas de trabajo manual ahora toma entre 25 y 45 minutos: 15-25 de procesamiento automático y 10-20 de revisión interactiva. La detección de variantes ortográficas es más robusta que la humana en casos de errores de tipeo poco obvios, y no hay deriva de consistencia a lo largo de sesiones largas.
-
-El código está en mi GitHub.
