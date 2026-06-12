@@ -1,0 +1,1 @@
+{"rule":"AGREEMENT_DET_NOUN","sentence":"^\\QExperiencias de nuestro pasado sumadas a los storytelling virales amplificados por las redes nos llevan a impermeabilizarnos e intentar torcer nuestra trayectoria ante el riesgo de toparnos con un nuevo círculo.\\E$"}
