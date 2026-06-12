@@ -3,19 +3,32 @@ import { cssVariables } from '../theme';
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { getLangFromUrl, type Lang } from '../i18n';
+import { getLangFromUrl, localizedPath, type Lang } from '../i18n';
 
 interface Props {
   title?: string;
   description?: string;
   lang?: Lang;
+  /** Imagen para compartir en redes (ruta absoluta del sitio). No usar SVG. */
+  ogImage?: string;
+  /** 'article' para posts, 'website' para el resto */
+  ogType?: 'website' | 'article';
 }
 
 const {
   title = 'Manuel Miller',
   description = 'Politólogo y Data Scientist',
   lang = getLangFromUrl(Astro.url),
+  ogImage = '/fotopersonal.jpg',
+  ogType = 'website',
 } = Astro.props;
+
+const fullTitle = title === 'Manuel Miller' ? title : `${title} — Manuel Miller`;
+const site = Astro.site ?? new URL('https://manuelmiller.com.ar');
+const canonicalUrl = new URL(Astro.url.pathname, site);
+const esUrl = new URL(localizedPath('es', Astro.url.pathname), site);
+const enUrl = new URL(localizedPath('en', Astro.url.pathname), site);
+const ogImageUrl = new URL(ogImage, site);
 ---
 
 <!doctype html>
@@ -24,7 +37,29 @@ const {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
-    <title>{title === 'Manuel Miller' ? title : `${title} — Manuel Miller`}</title>
+    <title>{fullTitle}</title>
+
+    <!-- SEO: canonical + alternates por idioma -->
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="alternate" hreflang="es" href={esUrl} />
+    <link rel="alternate" hreflang="en" href={enUrl} />
+    <link rel="alternate" hreflang="x-default" href={esUrl} />
+    <link rel="alternate" type="application/rss+xml" title="Manuel Miller — Blog" href={new URL('/rss.xml', site)} />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <!-- Open Graph / Twitter -->
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:site_name" content="Manuel Miller" />
+    <meta property="og:locale" content={lang === 'es' ? 'es_AR' : 'en_US'} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />

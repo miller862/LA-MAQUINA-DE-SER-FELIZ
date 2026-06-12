@@ -1,7 +1,6 @@
 ---
-import type { Lang } from '../i18n';
-import { colorFor, tagKey } from '../theme';
-import PodcastPlayer from './PodcastPlayer.astro';
+import { t, formatDate, type Lang } from '../i18n';
+import { colorFor, tagKey, tagLabel } from '../theme';
 
 interface Props {
   title:              string;
@@ -17,8 +16,8 @@ interface Props {
 }
 
 const { title, date, description, tags, cover, href, vertical, lang, index = 0, podcastEpisodeUrl } = Astro.props;
-// Muestra el panel si el campo existe en el frontmatter (aunque sea string vacío = mockup)
-const showPodcastPanel = podcastEpisodeUrl !== undefined && podcastEpisodeUrl !== null;
+// Muestra el acceso al episodio solo si hay URL real
+const showPodcastPanel = !!podcastEpisodeUrl;
 const verticalKey = vertical === 'ciencia-de-datos' ? 'data' : vertical;
 
 const verticalLabel: Record<string, string> = {
@@ -59,14 +58,14 @@ const canonicalTagKeys = tags.map(tagKey).join(',');
     </div>
 
     <div class="card-body">
-      <time class="card-date">{date}</time>
+      <time class="card-date" datetime={date}>{formatDate(lang, date)}</time>
       <h2 class="card-title">{title}</h2>
       <p class="card-desc">{description}</p>
       <ul class="card-tags">
         {tags.map(tag => {
           const c = colorFor(tag);
           return (
-            <li class="tag-chip" style={`background:${c.bg};color:${c.fg};`}>#{tag}</li>
+            <li class="tag-chip" style={`background:${c.bg};color:${c.fg};`}>#{tagLabel(tag, lang)}</li>
           );
         })}
       </ul>
@@ -74,15 +73,12 @@ const canonicalTagKeys = tags.map(tagKey).join(',');
   </a>
 
   {showPodcastPanel && (
-    <div class="card-podcast-panel">
-      <a href={href} class="pod-cta" aria-label={`Escuchar episodio: ${title}`}>
-        <div class="pod-cta__art">
-          <span class="pod-cta__ring"></span>
-          <span class="pod-cta__icon">▶</span>
-        </div>
-        <span class="pod-cta__label">Escuchar<br/>episodio</span>
-      </a>
-    </div>
+    <a href={`${href}#player`} class="card-podcast-panel" aria-label={`${t(lang, 'card.listen')}: ${title}`}>
+      <span class="pod-btn" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="6,4 20,12 6,20"/></svg>
+      </span>
+      <span class="pod-btn__label">{t(lang, 'card.listen')}</span>
+    </a>
   )}
 </article>
 
@@ -107,7 +103,7 @@ const canonicalTagKeys = tags.map(tagKey).join(',');
   .post-card--data:hover        { border-color: var(--color-data); }
   .post-card--podcast:hover     { border-color: var(--color-podcast); }
 
-  /* Podcast: borde sutil con tinte rosa siempre, indica naturaleza distinta */
+  /* Podcast: tinte cálido suave, indica naturaleza distinta */
   .post-card--podcast {
     background: linear-gradient(135deg, var(--color-bg-surface) 0%, var(--color-podcast-tint) 100%);
   }
@@ -257,73 +253,50 @@ const canonicalTagKeys = tags.map(tagKey).join(',');
   }
   .tag-chip:hover { transform: translateY(-1px); }
 
-  /* ── Panel de podcast lateral ── */
+  /* ── Acceso al episodio: botón sobrio, ancla al player del post ── */
   .card-podcast-panel {
-    border-top: 1px dashed var(--color-podcast);
-    padding: 0.85rem 1.25rem;
-    background: linear-gradient(90deg, var(--color-bg-surface) 0%, var(--color-podcast-tint) 100%);
-    border-radius: 0 0 var(--radius-xl) var(--radius-xl);
     display: flex;
     align-items: center;
     justify-content: center;
-  }
-
-  /* CTA de escucha */
-  .pod-cta {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.6rem;
-    text-decoration: none;
+    gap: 0.75rem;
+    padding: 0.9rem 1.25rem;
+    border-top: 1px solid var(--color-border);
     color: var(--color-podcast);
-    padding: 0.5rem;
+    text-decoration: none;
+    transition: background var(--transition-fast);
   }
-  .pod-cta__art {
-    position: relative;
-    width: 52px;
-    height: 52px;
-    display: flex;
+  .card-podcast-panel:hover { background: var(--color-podcast-tint); color: var(--color-podcast); }
+
+  .pod-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1.5px solid currentColor;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
+    transition: background var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
   }
-  .pod-cta__ring {
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    border: 2px solid var(--color-podcast);
-    opacity: 0.5;
-    transition: transform var(--transition-normal), opacity var(--transition-normal);
+  .pod-btn svg { margin-left: 2px; }
+  .card-podcast-panel:hover .pod-btn {
+    background: var(--color-podcast);
+    color: #fff;
+    transform: scale(1.06);
   }
-  .pod-cta:hover .pod-cta__ring {
-    transform: scale(1.18);
-    opacity: 0.9;
-  }
-  .pod-cta__icon {
-    font-size: 1.3rem;
-    line-height: 1;
-    transition: transform var(--transition-fast);
-  }
-  .pod-cta:hover .pod-cta__icon {
-    transform: scale(1.15);
-  }
-  .pod-cta__label {
+  .pod-btn__label {
     font-family: var(--font-mono);
-    font-size: 0.62rem;
+    font-size: 0.68rem;
     font-weight: 700;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    text-align: center;
-    line-height: 1.4;
-    opacity: 0.8;
-    transition: opacity var(--transition-fast);
   }
-  .pod-cta:hover .pod-cta__label { opacity: 1; }
 
-  /* En pantallas grandes: columna lateral derecha */
+  /* Desktop: columna angosta a la derecha, separada por un borde sutil */
   @media (min-width: 860px) {
     .post-card.has-podcast {
       display: grid;
-      grid-template-columns: 1fr 130px;
+      grid-template-columns: 1fr 112px;
       grid-template-rows: 1fr;
     }
     .post-card.has-podcast > a.card-link {
@@ -333,16 +306,15 @@ const canonicalTagKeys = tags.map(tagKey).join(',');
     .post-card.has-podcast .card-podcast-panel {
       grid-column: 2;
       grid-row: 1;
+      flex-direction: column;
+      gap: 0.7rem;
       border-top: none;
-      border-left: 1px dashed var(--color-podcast);
-      border-radius: 0 var(--radius-xl) var(--radius-xl) 0;
-      background: linear-gradient(180deg, var(--color-bg-surface) 0%, var(--color-podcast-tint) 100%);
-      flex-direction: column;
-      padding: 1.5rem 0.75rem;
+      border-left: 1px solid var(--color-border);
+      padding: 1.25rem 0.9rem;
     }
-    /* En desktop el CTA se orienta verticalmente */
-    .post-card.has-podcast .pod-cta {
-      flex-direction: column;
+    .post-card.has-podcast .pod-btn__label {
+      text-align: center;
+      line-height: 1.5;
     }
   }
 </style>

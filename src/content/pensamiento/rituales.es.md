@@ -82,4 +82,4 @@ Es más fácil ser un Frankenstein de adiciones de todo lo que fuimos que pregun
 - Reuní un grupo de gente que comparta tus valores para construir algo juntos.
 - Juntate a escuchar a alguien que no comparta tus valores.
 
-Son solo un par de ideas rápidas y si llegaste hasta acá me gustaría conocer que se te ocurre a vos.
+Son solo un par de ideas rápidas. Si llegaste hasta acá me gustaría conocer que se te ocurre a vos.

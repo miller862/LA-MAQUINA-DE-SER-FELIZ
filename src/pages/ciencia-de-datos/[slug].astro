@@ -3,6 +3,8 @@ import Base from '../../layouts/Base.astro';
 import PodcastPlayer from '../../components/PodcastPlayer.astro';
 import { getCollection, render } from 'astro:content';
 import { isPublished } from '../../content/visibility';
+import { t, formatDate, readingTime } from '../../i18n';
+import { tagLabel } from '../../theme';
 
 export async function getStaticPaths() {
   const entries = await getCollection('ciencia-de-datos', e => e.data.lang === 'es' && isPublished(e));
@@ -11,21 +13,26 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const { Content } = await render(entry);
+const minutes = readingTime(entry.body);
 ---
 
-<Base lang="es" title={entry.data.title} description={entry.data.description}>
+<Base lang="es" title={entry.data.title} description={entry.data.description} ogType="article">
   <article class="post-layout">
     <header class="post-header">
-      <p class="post-date">{entry.data.date}</p>
+      <p class="post-date">
+        <time datetime={entry.data.date}>{formatDate('es', entry.data.date)}</time>
+        <span class="post-date__sep">·</span>
+        {minutes} {t('es', 'post.minRead')}
+      </p>
       <h1>{entry.data.title}</h1>
       <p class="post-desc">{entry.data.description}</p>
       <ul class="post-tags">
-        {entry.data.tags.map((tag: string) => <li>#{tag}</li>)}
+        {entry.data.tags.map((tag: string) => <li>#{tagLabel(tag, 'es')}</li>)}
       </ul>
     </header>
 
     {entry.data.podcastEpisodeUrl !== undefined && (
-      <div class="post-player">
+      <div class="post-player" id="player">
         <PodcastPlayer episodeUrl={entry.data.podcastEpisodeUrl} compact={false} title={entry.data.title} />
       </div>
     )}
@@ -40,6 +47,7 @@ const { Content } = await render(entry);
   .post-layout { max-width: 720px; margin: 3rem auto; padding: 0 1rem; }
   .post-header { margin-bottom: 2rem; border-bottom: 1px solid var(--color-border); padding-bottom: 1.5rem; }
   .post-date { font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+  .post-date__sep { margin: 0 0.35rem; opacity: 0.6; }
   .post-header h1 { font-size: 2.25rem; margin-bottom: 0.75rem; font-family: var(--font-display); }
   .post-desc { color: var(--color-text-secondary); font-size: 1.05rem; margin-bottom: 1rem; }
   .post-tags { list-style: none; display: flex; gap: 0.5rem; flex-wrap: wrap; }

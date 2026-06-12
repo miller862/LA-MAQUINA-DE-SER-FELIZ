@@ -1,5 +1,5 @@
 ---
-import { colorFor, tagKey } from '../theme';
+import { colorFor, tagKey, tagLabel } from '../theme';
 import type { Lang } from '../i18n';
 
 interface Props {
@@ -49,8 +49,8 @@ const L = labels[lang];
         return (
           <li>
             <label class="tag-option">
-              <input type="checkbox" value={k} data-display={tag} />
-              <span class="tag-option__chip" style={`background:${c.bg};color:${c.fg};`}>#{tag}</span>
+              <input type="checkbox" value={k} data-display={tagLabel(tag, lang)} />
+              <span class="tag-option__chip" style={`background:${c.bg};color:${c.fg};`}>#{tagLabel(tag, lang)}</span>
             </label>
           </li>
         );

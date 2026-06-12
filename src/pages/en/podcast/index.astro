@@ -1,13 +1,34 @@
 ---
 import Base from '../../../layouts/Base.astro';
+import PodcastPlayer from '../../../components/PodcastPlayer.astro';
 import { getCollection } from 'astro:content';
 import { isPublished } from '../../../content/visibility';
-import PostCard from '../../../components/PostCard.astro';
-import { t } from '../../../i18n';
+import { t, formatDate } from '../../../i18n';
 
 const lang = 'en';
-const episodes = (await getCollection('podcast', e => e.data.lang === 'en' && isPublished(e)))
-  .sort((a, b) => b.data.date.localeCompare(a.data.date));
+
+// Episodes live as posts (in any collection) carrying podcastEpisodeUrl.
+const sections = [
+  { name: 'pensamiento',      basePath: '/en/thinking' },
+  { name: 'ciencia-de-datos', basePath: '/en/data-science' },
+] as const;
+
+const fromPosts = (await Promise.all(
+  sections.map(async s =>
+    (await getCollection(s.name, e => e.data.lang === lang && isPublished(e) && !!e.data.podcastEpisodeUrl))
+      .map(e => ({ entry: e, articleHref: `${s.basePath}/${e.data.postId}` as string | null }))
+  )
+)).flat();
+
+// Dedicated collection (empty for now): listed too if it ever gets entries.
+const fromPodcast = (await getCollection('podcast', e => e.data.lang === lang && isPublished(e) && !!e.data.podcastEpisodeUrl))
+  .map(e => ({ entry: e, articleHref: null as string | null }));
+
+const episodes = [...fromPosts, ...fromPodcast]
+  .sort((a, b) => a.entry.data.date.localeCompare(b.entry.data.date)) // asc to number them
+  .map((ep, i) => ({ ...ep, number: i + 1 }))
+  .reverse(); // newest first
+
 const hasEpisodes = episodes.length > 0;
 ---
 
@@ -35,22 +56,24 @@ const hasEpisodes = episodes.length > 0;
     {hasEpisodes ? (
       <section class="pod-episodes">
         <h2 class="pod-episodes__title">{t(lang, 'podcast.episodes')}</h2>
-        <div class="pod-episodes__list">
-          {episodes.map((entry, i) => (
-            <PostCard
-              title={entry.data.title}
-              date={entry.data.date}
-              description={entry.data.description}
-              tags={entry.data.tags}
-              cover={entry.data.cover}
-              href={`/en/podcast/${entry.data.postId}`}
-              vertical="podcast"
-              lang={lang}
-              index={i}
-              podcastEpisodeUrl={entry.data.podcastEpisodeUrl}
-            />
+        <ol class="pod-episodes__list">
+          {episodes.map(ep => (
+            <li class="episode">
+              <div class="episode__meta">
+                <span class="episode__number">{t(lang, 'podcast.episodeOf')} {String(ep.number).padStart(2, '0')}</span>
+                <time class="episode__date" datetime={ep.entry.data.date}>{formatDate(lang, ep.entry.data.date)}</time>
+              </div>
+              <h3 class="episode__title">{ep.entry.data.title}</h3>
+              <p class="episode__desc">{ep.entry.data.description}</p>
+              <div class="episode__player">
+                <PodcastPlayer episodeUrl={ep.entry.data.podcastEpisodeUrl} title={ep.entry.data.title} />
+              </div>
+              {ep.articleHref && (
+                <a class="episode__link" href={ep.articleHref}>{t(lang, 'podcast.readArticle')} →</a>
+              )}
+            </li>
           ))}
-        </div>
+        </ol>
       </section>
     ) : (
       <section class="pod-soon">
@@ -73,10 +96,18 @@ const hasEpisodes = episodes.length > 0;
   .pod-tagline { font-family: var(--font-display); font-size: 1.25rem; color: var(--color-text); line-height: 1.4; margin-bottom: 1rem; }
   .pod-text { color: var(--color-text-secondary); font-size: 1rem; line-height: 1.75; max-width: 52ch; }
   .pod-episodes__title { font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; margin-bottom: 1.5rem; }
-  .pod-episodes__list { display: flex; flex-direction: column; gap: 1.75rem; }
+  .pod-episodes__list { display: flex; flex-direction: column; gap: 1.75rem; list-style: none; padding: 0; }
+  .episode { border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.75rem 2rem; background: linear-gradient(135deg, var(--color-bg-surface) 0%, var(--color-podcast-tint) 100%); box-shadow: var(--shadow-card); }
+  .episode__meta { display: flex; gap: 1rem; align-items: baseline; margin-bottom: 0.5rem; }
+  .episode__number { font-family: var(--font-mono); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-podcast); }
+  .episode__date { font-family: var(--font-mono); font-size: 0.72rem; color: var(--color-text-muted); }
+  .episode__title { font-family: var(--font-display); font-size: 1.4rem; font-weight: 600; margin-bottom: 0.5rem; }
+  .episode__desc { color: var(--color-text-secondary); font-size: 0.95rem; line-height: 1.65; margin-bottom: 1rem; }
+  .episode__player { margin-bottom: 0.9rem; }
+  .episode__link { font-size: 0.85rem; font-weight: 600; }
   .pod-soon { text-align: center; padding: 3rem 1rem; background: var(--color-podcast-tint); border: 1px solid var(--color-border); border-radius: var(--radius-lg); }
   .pod-soon__dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--color-podcast); margin-bottom: 1rem; }
   .pod-soon__label { font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-podcast); margin-bottom: 0.6rem; }
   .pod-soon__text { color: var(--color-text-secondary); font-size: 0.98rem; line-height: 1.7; max-width: 46ch; margin: 0 auto; }
-  @media (max-width: 720px) { .pod-hero { grid-template-columns: 1fr; gap: 1.75rem; } .pod-art { max-width: 280px; } .pod-art::after { inset: 10px -10px -10px 10px; } }
+  @media (max-width: 720px) { .pod-hero { grid-template-columns: 1fr; gap: 1.75rem; } .pod-art { max-width: 280px; } .pod-art::after { inset: 10px -10px -10px 10px; } .episode { padding: 1.4rem 1.4rem; } }
 </style>

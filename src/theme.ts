@@ -77,6 +77,27 @@ export function tagKey(tag: string): string {
 export const colorFor = (tag: string) =>
   tagPalette[tagKey(tag)] ?? { bg: '#64748B', fg: '#fff' };
 
+// ─── Labels de tags por idioma ────────────────────────────────────────────────
+// El frontmatter guarda el tag en cualquier variante; acá se resuelve el texto
+// que se muestra (con acentos y traducido). Fallback: el tag tal cual está.
+const tagLabels: Record<string, { es: string; en: string }> = {
+  politica:         { es: 'política',          en: 'politics' },
+  filosofia:        { es: 'filosofía',         en: 'philosophy' },
+  economia:         { es: 'economía',          en: 'economics' },
+  'opinion-publica':{ es: 'opinión pública',   en: 'public opinion' },
+  'relaciones internacionales': { es: 'relaciones internacionales', en: 'international relations' },
+  nlp:              { es: 'NLP',               en: 'NLP' },
+  python:           { es: 'Python',            en: 'Python' },
+  ml:               { es: 'ML',                en: 'ML' },
+  ia:               { es: 'IA',                en: 'AI' },
+  estadistica:      { es: 'estadística',       en: 'statistics' },
+  podcast:          { es: 'podcast',           en: 'podcast' },
+};
+
+export function tagLabel(tag: string, lang: 'es' | 'en'): string {
+  return tagLabels[tagKey(tag)]?.[lang] ?? tag;
+}
+
 export const typography = {
   fontDisplay: "'EB Garamond', 'Georgia', serif",
   fontBody:    "'Inter', 'system-ui', sans-serif",

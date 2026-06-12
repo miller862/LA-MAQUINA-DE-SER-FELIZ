@@ -1,8 +1,10 @@
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
+import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-  integrations: [mdx()],
+  site: 'https://manuelmiller.com.ar',
+  integrations: [mdx(), sitemap()],
   i18n: {
     defaultLocale: 'es',
     locales: ['es', 'en'],
@@ -11,7 +13,7 @@ export default defineConfig({
   vite: {
     server: {
       watch: {
-        // Fuerza polling para que los cambios en contenido sean detectados inmediatamente
+        // Fuerza polling para detectar cambios de contenido inmediatamente
         usePolling: true,
         interval: 300,
       },

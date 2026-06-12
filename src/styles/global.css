@@ -80,17 +80,6 @@ pre {
   color: var(--color-text);
   position: relative;
 }
-.prose blockquote.song-quote::before {
-  content: '\201C';
-  position: absolute;
-  top: -0.5rem;
-  left: 1.25rem;
-  font-size: 4rem;
-  color: var(--color-primary);
-  font-family: var(--font-display);
-  line-height: 1;
-  opacity: 0.5;
-}
 .prose blockquote.song-quote p {
   margin: 0 0 0.75rem;
 }

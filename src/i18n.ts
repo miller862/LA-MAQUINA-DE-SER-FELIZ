@@ -26,6 +26,13 @@ export const ui = {
     'podcast.soon.label': 'Primer episodio en camino',
     'podcast.soon.text':  'Estoy preparando los primeros episodios. Mientras tanto, podés seguirme en LinkedIn para enterarte cuando salga.',
     'podcast.episodes':   'Episodios',
+    'podcast.readArticle': 'Leer el artículo',
+    'podcast.episodeOf':  'Episodio',
+    'card.listen':        'Escuchar episodio',
+    'post.minRead':       'min de lectura',
+    'notfound.title':     'Página no encontrada',
+    'notfound.text':      'La página que buscás no existe o cambió de lugar.',
+    'notfound.back':      'Volver al inicio',
   },
   en: {
     'nav.blog':           'Blog',
@@ -52,6 +59,13 @@ export const ui = {
     'podcast.soon.label': 'First episode on its way',
     'podcast.soon.text':  'I am putting together the first episodes. In the meantime, follow me on LinkedIn to hear when it drops.',
     'podcast.episodes':   'Episodes',
+    'podcast.readArticle': 'Read the article',
+    'podcast.episodeOf':  'Episode',
+    'card.listen':        'Listen to the episode',
+    'post.minRead':       'min read',
+    'notfound.title':     'Page not found',
+    'notfound.text':      'The page you are looking for does not exist or has moved.',
+    'notfound.back':      'Back to home',
   },
 } as const;
 
@@ -90,4 +104,22 @@ export function localizedPath(lang: Lang, path: string): string {
   });
   if (lang === 'es') return translated || '/';
   return `/en${translated}`;
+}
+
+// ── Helpers editoriales ──────────────────────────────────────────────────────
+
+/** "2026-06-01" → "1 de junio de 2026" / "June 1, 2026" */
+export function formatDate(lang: Lang, isoDate: string): string {
+  const d = new Date(`${isoDate}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return isoDate; // fallback: nunca romper
+  return new Intl.DateTimeFormat(lang === 'es' ? 'es-AR' : 'en-US', {
+    day: 'numeric', month: 'long', year: 'numeric',
+  }).format(d);
+}
+
+/** Minutos de lectura estimados a partir del cuerpo markdown (~220 palabras/min) */
+export function readingTime(body: string | undefined): number {
+  if (!body) return 1;
+  const words = body.replace(/[#>*_`\-\[\]()]/g, ' ').split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.round(words / 220));
 }
