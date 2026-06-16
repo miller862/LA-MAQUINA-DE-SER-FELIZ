@@ -1,6 +1,6 @@
 ---
 title: "Why should we worry about the disappearance of rituals"
-date: "2026-06-01"
+date: "2026-06-18"
 description: "The risk we are taking by not stopping to make time habitable"
 tags: ["filosofia", "politica"]
 cover: "/img/linea_curva.svg"

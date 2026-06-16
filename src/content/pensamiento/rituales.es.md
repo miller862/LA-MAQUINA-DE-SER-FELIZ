@@ -1,6 +1,6 @@
 ---
 title: "Por qué deberían preocuparnos la desaparición de los rituales"
-date: "2026-06-01"
+date: "2026-06-18"
 description: "No todo lo que es oro brilla. Hay un riesgo que corremos de llegar al final de nuestra historia sin habernos detenido a hacer habitable el tiempo."
 tags: ["filosofia", "politica"]
 cover: "/img/linea_curva.svg"
