@@ -36,11 +36,12 @@ export const tagPalette: Record<string, { bg: string; fg: string }> = {
   'opinion-publica':{ bg: '#875A79', fg: '#fff' },   // malva
   'relaciones internacionales': { bg: '#4A6E9A', fg: '#fff' },
   nlp:              { bg: '#2F7E7E', fg: '#fff' },   // teal
+  llm:              { bg: '#5A6EA6', fg: '#fff' },   // azul-índigo
   python:           { bg: '#3A6E8A', fg: '#fff' },
   ml:               { bg: '#326F6F', fg: '#fff' },
   ia:               { bg: '#5B5EA6', fg: '#fff' },   // violeta IA
   estadistica:      { bg: '#4A7C6F', fg: '#fff' },   // verde-gris
-  podcast:          { bg: '#9A5B3B', fg: '#fff' },   // terracota
+  opinion:          { bg: '#9A5B3B', fg: '#fff' },   // terracota
 };
 
 // Aliases: variantes en cualquier idioma → clave canónica del tagPalette
@@ -51,10 +52,10 @@ const tagAliases: Record<string, string> = {
   'economy':                'economia',
   'international relations':'relaciones internacionales',
   'public opinion':         'opinion-publica',
+  'opinion':             'opinion',
   'machine learning':       'ml',
   'artificial intelligence':'ia',
   'statistics':             'estadistica',
-  'llm':                    'nlp',
 };
 
 // Normaliza: lowercase, sin acentos, sin espacios extra
@@ -87,11 +88,12 @@ const tagLabels: Record<string, { es: string; en: string }> = {
   'opinion-publica':{ es: 'opinión pública',   en: 'public opinion' },
   'relaciones internacionales': { es: 'relaciones internacionales', en: 'international relations' },
   nlp:              { es: 'NLP',               en: 'NLP' },
+  llm:              { es: 'LLM',               en: 'LLM' },
   python:           { es: 'Python',            en: 'Python' },
   ml:               { es: 'ML',                en: 'ML' },
   ia:               { es: 'IA',                en: 'AI' },
   estadistica:      { es: 'estadística',       en: 'statistics' },
-  podcast:          { es: 'podcast',           en: 'podcast' },
+  opinion:          { es: 'opinión',          en: 'opinion' },
 };
 
 export function tagLabel(tag: string, lang: 'es' | 'en'): string {

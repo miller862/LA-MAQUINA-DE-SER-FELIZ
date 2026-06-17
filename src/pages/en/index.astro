@@ -21,10 +21,10 @@ const allEntries = [
 const allTags = [...new Set(allEntries.flatMap(e => e.data.tags))].sort();
 
 const verticals = [
-  { key: 'pensamiento', title: 'Thinking',     subtitle: 'Politics · Philosophy · Current affairs',
+  { key: 'pensamiento', title: 'Thinking',     subtitle: 'Politics · Philosophy · Economy',
     desc: 'Some everyday reflections to keep from being indifferent to reality.',
     count: pensamiento.length + podcast.length },
-  { key: 'data', title: 'Data Science', subtitle: 'Analysis · Models · Data',
+  { key: 'data', title: 'Data Science', subtitle: 'Analysis · Models · Development',
     desc: 'A place to tell ideas through data and share my latest projects.',
     count: datos.length },
 ];
