@@ -29,7 +29,7 @@ We are terrified of closing chapters. Our brain, atrophied by marginalist econom
 
 In modernity, life could be organized around certain spheres with greater or lesser degrees of definition, without being exempt from overlaps. Some of the most common are economic prosperity, professional career, family, beauty, health, and academic formation. These spheres had greater or lesser presence in people's lives at different moments. We call those moments stages.
 
-In postmodernity, however, we can no longer speak of stages but of verticals or lanes. All of them can happen simultaneously, some may never open, but what they must not do is close. The postmodern, globalized subject not only encounters limits in space but seeks to traverse time free of constraints. If stages do not exist, each vertical of development offers fertile ground for neoliberalism's self-exploitation.
+In postmodernity, however, we can no longer speak of stages but of verticals or lanes. All of them can happen simultaneously, some may never open, but what they must not do is close. The postmodern, globalized subject not only doesn´t encounters limits in space but seeks to traverse time free of constraints. If stages do not exist, each vertical of development offers fertile ground for neoliberalism's self-exploitation.
 
 This severance of initiation and closure rituals not only empties individual time but isolates us from others, directly undermining the idea of community — of which we still have some childhood memories left.
 
@@ -45,7 +45,7 @@ Every encounter jolts and bends our line. The line stops pointing in the directi
 
 I say we instrumentalize others, trying to orchestrate their entry and exit times at our pleasure. The circles that burst into our lives make us uncomfortable, while we seek to intersect with certain circles with more distant orbits. We despair at not having control over other people's orbits. Once past the first intersection, we maximize the benefit of the area generated between our lines. Some areas are larger or smaller than others; what matters is extracting maximum benefit and having control over the moment of closure — the exit of the other person from my life — after all, my life goes on and my project goes on. If we can't control the entry point, at least we take advantage of the circumstance and wrap it up when convenient.
 
-Sharing the pre-show of a concert with others is part of a whole, where the verb "I attended" in the first person singular loses its meaning. Sharing a beer or a coffee with someone special tastes better. Having conversations that last more than a thermos of mate is a treasure nowadays — not all that glitters is gold (Manu Chao). The non-productive ways of inhabiting time are among the few things that can split narcissistic individuality like lightning and make us part of something larger.
+Sharing the pre-show of a concert with others is part of a whole, where the verb "I attended" in the first person singular loses its meaning. Sharing a beer or a coffee with someone special tastes better. Having conversations that last more than a thermos of mate is a treasure nowadays — not all that glitters is gold (Manu Chao). The non-productive ways of inhabiting time are among the few things that can split narcissistic individuality like lightning and make us part of something greater.
 
 ## The worst of both worlds
 

@@ -29,9 +29,9 @@ Nos aterra cerrar etapas. Nuestro cerebro atrofiado por el cálculo económico m
 
 En la modernidad, la vida podía organizarse sobre la base de ciertas esferas con mayor o menor grado de definición sin estar exentas a solapamientos. Algunas de las más comunes son la prosperidad económica, la carrera profesional, la familia, la belleza, la salud, la formación académica. Estas esferas tenían mayor o menor presencia en la vida de las personas en distintos momentos de esta. Denominamos a esos momentos etapas.
 
-En la posmodernidad, en cambio, ya no podemos hablar de etapas sino de verticales o carriles. Todas pueden suceder en simultáneo, algunas pueden no abrirse nunca, pero lo que no deben es cerrarse. El sujeto posmoderno y globalizado no solo conoce límites en el espacio, sino que busca transitar el tiempo libre de ataduras. Si no existen las etapas, cada vertical de desarrollo ofrece un terreno fértil para la autoexplotación del neoliberalismo.
+En la posmodernidad, en cambio, ya no podemos hablar de etapas sino de verticales o carriles. Todas pueden suceder en simultáneo, algunas pueden no abrirse nunca, pero lo que no deben es cerrarse. El sujeto posmoderno y globalizado no solo no conoce límites en el espacio, sino que busca transitar el tiempo libre de ataduras. Si no existen las etapas, cada vertical de desarrollo ofrece un terreno fértil para la autoexplotación del neoliberalismo.
 
-Este cercenamiento de los rituales de iniciación y cierre no solo vacía el tiempo individual, sino que nos aísla de las personas atentando directamente contra la idea de comunidad de que aún nos quedan algunos recuerdos de la infancia.
+Este cercenamiento de los rituales de iniciación y cierre no solo vacía el tiempo individual, sino que nos aísla de las personas atentando directamente contra la idea de comunidad de la cuál aún nos quedan algunos recuerdos de la infancia.
 
 ## Los otros ralentizan el tiempo
 
@@ -45,7 +45,7 @@ Cada encuentro nos trastoca y tuerce nuestra línea. Ya la línea deja de apunta
 
 Digo que instrumentalizamos a los otros tratando de orquestar a nuestro placer sus tiempos de entrada y salida. Los círculos que irrumpen en nuestra vida nos incomodan mientras que buscamos intersecar con ciertos círculos con órbitas más lejanas. Nos desespera no tener control de las órbitas ajenas. Una vez pasada la primera intersección maximizamos el beneficio del área que se genera entre nuestras líneas. Algunas áreas son más grandes o más pequeñas que otras, lo importante es sacar el máximo beneficio y tener el control sobre el momento de cierre, de la salida de la otra persona de mi vida, después de todo mi vida sigue y sigue mi proyecto. Si no podemos controlar el punto de entrada al menos sacamos provecho de la circunstancia y la finiquitamos cuando sea conveniente.
 
-Compartir con otros la previa de un recital formado parte de un todo, donde el verbo "asistí" de la primera persona del singular carece de sentido. Tomar una cerveza o un café con alguien especial tiene mejor sabor. Tener charlas que duren más de un termo de mate hoy en día es un tesoro, no todo lo que es oro brilla (Manu Chao). Son las formas no productivas de habitar el tiempo las pocas cosas que pueden partir como con un rayo la individualidad narcisista para formar parte de algo más grande.
+Compartir con otros la previa de un recital formado parte de un todo, donde el verbo "asistí" de la primera persona del singular carece de sentido. Tomar una cerveza o un café con alguien especial tiene mejor sabor. Tener charlas que duren más de un termo de mate hoy en día es un tesoro, no todo lo que es oro brilla (Manu Chao). Son las formas no productivas de habitar el tiempo de las pocas cosas que pueden partir como con un rayo la individualidad narcisista para permitirnos formar parte de algo más grande.
 
 ## Lo peor de los dos mundos
 
