@@ -1,7 +1,7 @@
 ---
 title: "Codificando respuestas abiertas con procesamiento de lenguaje natural y modelos de lenguaje"
-date: "2025-06-18"
-description: ""
+date: "2026-07-10"
+description: "Cuando ahorrar costos y tiempos coincide con un aumento de la efectividad. Cómo usamos técnicas de procesamiento de lenguaje natural (NLP) y modelos de lenguaje para codificar preguntas abiertas con foco en la pregunta de investigación."
 tags: ["python", "nlp", "ia"]
 lang: "es"
 postId: "codificador-preguntas-abiertas"
@@ -10,200 +10,166 @@ draft: false
 ---
 
 <div style="margin-bottom:2.5rem;border-radius:12px;overflow:hidden;background:#0c0f0c;">
-  <img src="/img/banner-codificador.svg" alt="Codificador de preguntas abiertas" style="width:100%;display:block;height:auto;" />
+  <img src="/img/cover-codificador.svg" alt="Codificador de preguntas abiertas" style="width:100%;display:block;height:auto;" />
 </div>
 
-En investigación cuantitativa todos odiamos las preguntas abiertas. Sin embargo de todos los usarios que intervienen en el proceso de una encuesta, el que mas las odia es probablemente el encargado de codificar las respuestas.
+En investigación de mercado, las preguntas abiertas son un arma de doble filo: capturan una riqueza y una especificidad deseable pero cuantificarlas es siempre un desafío por la ambigüedad, la variedad semántica y los errores ortográficos que traen. En Moiguer desarrollamos nuestra propia solución in-house para este problema de antaño en encuestas de opinión desarrollando nuestro propio software de codificación de preguntas abiertas.
 
-Para convertirlas en datos, existe un proceso que se llama **codificación**: alguien lee todas las respuestas, agrupa las que dicen lo mismo, asigna un número a cada grupo, y reemplaza el texto por ese número en la base de datos. "Hellmanns", "Jelman" y "hellmans" se agrupan bajo un mismo codigo, que corresponde a Hellmann's.
+Para convertir texto libre en datos existe un proceso que se llama **codificación**. Alguien lee todas las respuestas, agrupa las que dicen lo mismo, asigna un número a cada grupo y reemplaza el texto por ese número en la base. "Hellmanns", "Jelman" y "hellmans" terminan bajo un mismo código, el que corresponde a Hellmann's.
 
-Es un trabajo tedioso, repetitivo y propenso a errores de consistencia. Y cuando se trata de miles de respuestas a múltiples preguntas para varios proyectos corriendo en paralelo, es también caro e ineficiente. Decidí automatizarlo.
+Es un trabajo tedioso, repetitivo y propenso a errores de consistencia. Cuando se trata de miles de respuestas a múltiples preguntas, para varios proyectos corriendo en paralelo, además es caro e ineficiente. Ese fue el punto de partida.
 
----
-
-## El problema en toda su complejidad
-
- Hay dos situaciones fundamentalmente distintas ante cualquier pregunta abierta:
-
-**Cuando ya existe un libro de códigos.** En estudios longitudinales, paneles o proyectos con múltiples olas, alguien ya definió las categorías en una medición anterior. Hay un archivo —el libro de códigos— con una lista de claves numéricas y los valores canónicos que les corresponden. La tarea aquí es *imputar*: tomar cada respuesta nueva y mapearla a la clave correcta. El desafío principal es la variabilidad ortográfica. "Cocca-cola", "coca cola", "CocaCola" y "la negra" corresponden todas a una misma clave.
-
-**Cuando no existe ningún libro de códigos.** En estudios nuevos o preguntas que nunca se habían hecho, hay que *Codificar* las categorías desde cero. El analista no sabe de antemano qué va a encontrar. Primero hay que descubrir qué categorías emergen de los datos, luego asignar cada respuesta a alguna, y finalmente generar un Libro de codigos escalable (En casso de que se repita el estudio).
-
-Ambos flujos comparten infraestructura pero tienen lógicas completamente distintas.
+El objetivo era aumentar la eficiencia (de recursos y tiempo), sin perder efectividad (hablo de la fidelidad del resultado final) y de ser posible, incrementarla.
 
 ---
 
-## Un problema que nadie menciona: la respuesta multi-valor
+## Dos problemas, no uno
 
-Hay un tercer que aparece todo el tiempo.
+Toda pregunta abierta cae en una de dos situaciones, y cada una exige una lógica distinta.
 
-Imaginá una pregunta: *"¿Qué cualidades debería tener un buen jugador de fútbol?"*. Un encuestado responde: *"Velocidad, técnica y garra"*. Otro: *"La actitud y el compromiso con el equipo"*.
+**Cuando ya existe un libro de códigos.** En estudios longitudinales, paneles o proyectos con múltiples olas, las categorías se definieron en una medición anterior. Hay un archivo (el libro de códigos) con una lista de claves numéricas y los valores que les corresponden. La tarea es *imputar*: tomar cada respuesta nueva y mapearla a la clave correcta. El desafío central es la variabilidad ortográfica: "Cocca-cola", "coca cola" y "CocaCola" refieren a la misma clave.
 
-El primero mencionó tres cosas. El segundo mencionó dos. Pero en el archivo de datos, ambas ocupan una sola celda. Si codificamos esa celda como una unidad, perdemos menciones. En un estudio de imagen de marca o de atributos de producto, esas menciones perdidas pueden cambiar los resultados.
+**Cuando no existe ningún libro de códigos.** En estudios nuevos, o en preguntas que nunca se hicieron, hay que *codificar* las categorías desde cero. El analista no sabe de antemano qué va a encontrar, puede intuirlo, pero si quiere predefinir el libro de códigos incurre en el riesgo de introducir su sesgo por encima de lo que dicen los encuestados. Primero hay que descubrir qué categorías emergen de los datos, después asignar cada respuesta a una, y finalmente producir un libro de códigos reutilizable para las próximas olas.
 
-La solución que desarrollé es la **expansión ad-hoc**: detectar cuándo una respuesta contiene múltiples menciones reales, dividirlas, y distribuirlas en columnas adicionales. La columna original (`P23`) se queda con la primera mención (top of mind), y se crean columnas nuevas (`P23adhoc2`, `P23adhoc3`, etc.) para las siguientes. La detección no puede ser solo por regex —una coma puede separar menciones o puede ser parte de una frase narrativa— por eso la decisión final la toma un Modelo de lenguaje entreado para estas situaciones.
+Los dos flujos comparten infraestructura pero resuelven cosas diferentes. La distinción no es menor: la imputación sigue una pauta que ya existe, mientras que la codificación lo fabrica.
 
----
-
-## La arquitectura
-
-<svg viewBox="0 0 600 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;display:block;margin:1.5rem auto;">
-  <rect width="600" height="120" fill="none"/>
-  <!-- main box -->
-  <rect x="150" y="4" width="300" height="38" rx="5" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.5"/>
-  <text x="300" y="18" text-anchor="middle" font-family="monospace" font-size="10" fill="currentColor" opacity="0.9" font-weight="bold">main.py</text>
-  <text x="300" y="32" text-anchor="middle" font-family="monospace" font-size="9" fill="currentColor" opacity="0.55">Seleccionar proyecto → Cargar → Menú preguntas</text>
-  <!-- flechas hacia abajo -->
-  <line x1="220" y1="42" x2="160" y2="68" stroke="currentColor" stroke-width="1" opacity="0.4"/>
-  <line x1="380" y1="42" x2="440" y2="68" stroke="currentColor" stroke-width="1" opacity="0.4"/>
-  <!-- imputation box -->
-  <rect x="60" y="68" width="200" height="34" rx="5" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.4"/>
-  <text x="160" y="82" text-anchor="middle" font-family="monospace" font-size="10" fill="currentColor" opacity="0.8" font-weight="bold">IMPUTACIÓN</text>
-  <text x="160" y="95" text-anchor="middle" font-family="monospace" font-size="8.5" fill="currentColor" opacity="0.5">LDC existe → asignar claves</text>
-  <!-- codification box -->
-  <rect x="340" y="68" width="200" height="34" rx="5" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.4"/>
-  <text x="440" y="82" text-anchor="middle" font-family="monospace" font-size="10" fill="currentColor" opacity="0.8" font-weight="bold">CODIFICACIÓN</text>
-  <text x="440" y="95" text-anchor="middle" font-family="monospace" font-size="8.5" fill="currentColor" opacity="0.5">Sin LDC → crear categorías</text>
+<svg viewBox="0 0 600 270" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;display:block;margin:1.5rem auto;font-family:monospace;">
+  <defs><marker id="d1" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="currentColor" opacity="0.7"/></marker></defs>
+  <rect x="215" y="6" width="170" height="36" rx="8" fill="currentColor" fill-opacity="0.06" stroke="currentColor" stroke-opacity="0.5"/>
+  <text x="300" y="24" text-anchor="middle" font-size="11" fill="currentColor" font-weight="bold">Cargar proyecto</text>
+  <text x="300" y="37" text-anchor="middle" font-size="8.5" fill="currentColor" opacity="0.6">y elegir preguntas</text>
+  <line x1="300" y1="42" x2="300" y2="58" stroke="currentColor" stroke-opacity="0.5" marker-end="url(#d1)"/>
+  <polygon points="300,60 375,92 300,124 225,92" fill="currentColor" fill-opacity="0.04" stroke="currentColor" stroke-opacity="0.55"/>
+  <text x="300" y="90" text-anchor="middle" font-size="10" fill="currentColor" font-weight="bold">¿hay libro</text>
+  <text x="300" y="103" text-anchor="middle" font-size="10" fill="currentColor" font-weight="bold">de códigos?</text>
+  <path d="M225,92 L150,92 L150,142" fill="none" stroke="currentColor" stroke-opacity="0.5" marker-end="url(#d1)"/>
+  <text x="185" y="84" font-size="8.5" fill="currentColor" opacity="0.8" font-weight="bold">sí</text>
+  <rect x="65" y="144" width="170" height="44" rx="8" fill="currentColor" fill-opacity="0.09" stroke="currentColor" stroke-opacity="0.65"/>
+  <text x="150" y="163" text-anchor="middle" font-size="11" fill="currentColor" font-weight="bold">Imputación</text>
+  <text x="150" y="178" text-anchor="middle" font-size="8.5" fill="currentColor" opacity="0.6">usar los códigos que ya existen</text>
+  <path d="M375,92 L450,92 L450,142" fill="none" stroke="currentColor" stroke-opacity="0.5" marker-end="url(#d1)"/>
+  <text x="415" y="84" font-size="8.5" fill="currentColor" opacity="0.8" font-weight="bold">no</text>
+  <rect x="365" y="144" width="170" height="44" rx="8" fill="currentColor" fill-opacity="0.09" stroke="currentColor" stroke-opacity="0.65"/>
+  <text x="450" y="163" text-anchor="middle" font-size="11" fill="currentColor" font-weight="bold">Codificación</text>
+  <text x="450" y="178" text-anchor="middle" font-size="8.5" fill="currentColor" opacity="0.6">armar los códigos desde cero</text>
+  <path d="M150,188 L150,224 L290,224" fill="none" stroke="currentColor" stroke-opacity="0.4" marker-end="url(#d1)"/>
+  <path d="M450,188 L450,224 L310,224" fill="none" stroke="currentColor" stroke-opacity="0.4" marker-end="url(#d1)"/>
+  <rect x="215" y="228" width="170" height="36" rx="8" fill="currentColor" fill-opacity="0.06" stroke="currentColor" stroke-opacity="0.5"/>
+  <text x="300" y="246" text-anchor="middle" font-size="10.5" fill="currentColor" font-weight="bold">Base codificada</text>
+  <text x="300" y="259" text-anchor="middle" font-size="8.5" fill="currentColor" opacity="0.6">y libro listo para la próxima ola</text>
 </svg>
 
 ---
 
-## Multi-proyecto y configuración por proyecto
+## Proyectos múltiples y respuestas múltiples
 
-La herramienta no fue diseñada para un único estudio. El menú inicial lista todos los proyectos disponibles en una carpeta central. Cada proyecto tiene su propia estructura:
+La herramienta no se pensó para un único estudio. El menú inicial lista todos los proyectos de una carpeta central, y cada uno tiene su propia estructura: los datos de entrada, el libro de códigos, las variaciones aprendidas y los resultados con sus checkpoints. Los subproyectos se detectan de forma automática, y cuando los archivos siguen un patrón de olas la herramienta pregunta qué ola procesar. Cada proyecto puede tener además sus propios códigos especiales.
 
-```
-proyectos/
-  PROYECTO_A/
-    data/          ← archivos Excel de entrada
-    LDC/           ← libro(s) de códigos
-    REFUERZOS/     ← variaciones aprendidas
-    outputs/       ← resultados + checkpoints
-  PROYECTO_B/
-    subproyecto_a/           
-    subproyecto_b/            
-```
-
-Los subproyectos se detectan automáticamente. Si los archivos siguen el patrón `PROYECTO1.xlsx`, `PROYECTO2.xlsx`, también pregunta el número de ola. Cada proyecto puede tener sus propios códigos especiales.
+No importa qué tan claramente se redacte una pregunta, mientras las preguntas sigan siendo respondidas por personas con agencia propia seguirá existiendo la libre interpretación de las preguntas (y esperemos que así siga siendo), lo que hace que muchas veces el usuario responda con más de un factor en su respuesta. Por ejemplo, ante la pregunta "¿Qué es lo que te resulta más atractivo de este producto?", el encuestado puede responder: "Me gusta su presentación y la variedad que ofrece". Ideamos una lógica para captar ambas dimensiones, presentación y variedad, diferenciando entre top of mind o driver principal y secundarios.
 
 ---
 
 ## El flujo de imputación
 
-<svg viewBox="0 0 520 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:520px;display:block;margin:1.5rem auto;font-family:monospace;">
-  <rect width="520" height="340" fill="none"/>
+Cuando el libro de códigos ya existe, entra como insumo de solo lectura. El objetivo es una única salida: la base codificada.
 
-  <!-- Nodo 1 -->
-  <rect x="60" y="4" width="400" height="44" rx="5" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.5"/>
-  <text x="260" y="22" text-anchor="middle" font-size="10" fill="currentColor" opacity="0.85" font-weight="bold">Detección automática de especiales</text>
-  <text x="260" y="38" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.55">"no sé", "ninguno", vacíos → se asignan sin LLM</text>
-  <line x1="260" y1="48" x2="260" y2="68" stroke="currentColor" stroke-width="1" opacity="0.4"/>
-  <polygon points="255,66 265,66 260,74" fill="currentColor" opacity="0.4"/>
-
-  <!-- Nodo 2 -->
-  <rect x="60" y="74" width="400" height="44" rx="5" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.5"/>
-  <text x="260" y="92" text-anchor="middle" font-size="10" fill="currentColor" opacity="0.85" font-weight="bold">Clasificación LLM en batches de 50</text>
-  <text x="260" y="108" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.55">Prompt con LDC completo + refuerzos + ejemplos fonéticos</text>
-  <line x1="260" y1="118" x2="260" y2="138" stroke="currentColor" stroke-width="1" opacity="0.4"/>
-  <polygon points="255,136 265,136 260,144" fill="currentColor" opacity="0.4"/>
-
-  <!-- Rombo decisión -->
-  <polygon points="260,144 340,168 260,192 180,168" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.45"/>
-  <text x="260" y="164" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.8">¿Quedó</text>
-  <text x="260" y="177" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.8">en OTRO?</text>
-  <!-- SÍ -->
-  <line x1="260" y1="192" x2="260" y2="212" stroke="currentColor" stroke-width="1" opacity="0.35" stroke-dasharray="4 3"/>
-  <text x="268" y="206" font-size="8" fill="currentColor" opacity="0.5">SÍ</text>
-  <polygon points="255,210 265,210 260,218" fill="currentColor" opacity="0.35"/>
-
-  <!-- Nodo 3 -->
-  <rect x="60" y="218" width="400" height="44" rx="5" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.45"/>
-  <text x="260" y="236" text-anchor="middle" font-size="10" fill="currentColor" opacity="0.85" font-weight="bold">Segunda pasada (batches de 20)</text>
-  <text x="260" y="252" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.55">Re-clasifica con ejemplos reales de cada categoría</text>
-  <line x1="260" y1="262" x2="260" y2="282" stroke="currentColor" stroke-width="1" opacity="0.4"/>
-  <polygon points="255,280 265,280 260,288" fill="currentColor" opacity="0.4"/>
-
-  <!-- Nodo 4 -->
-  <rect x="60" y="288" width="400" height="44" rx="5" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.45"/>
-  <text x="260" y="306" text-anchor="middle" font-size="10" fill="currentColor" opacity="0.85" font-weight="bold">Revisión interactiva + guardar</text>
-  <text x="260" y="322" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.55">Analista aprueba, edita o mueve · acumula refuerzos</text>
+<svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;display:block;margin:1.5rem auto;font-family:monospace;">
+  <defs><marker id="i2" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="currentColor" opacity="0.7"/></marker></defs>
+  <rect x="30" y="60" width="120" height="44" rx="8" fill="none" stroke="currentColor" stroke-opacity="0.4" stroke-dasharray="4 3"/>
+  <text x="90" y="80" text-anchor="middle" font-size="9.5" fill="currentColor" opacity="0.75" font-weight="bold">Libro de códigos</text>
+  <text x="90" y="94" text-anchor="middle" font-size="8" fill="currentColor" opacity="0.55">insumo (solo lectura)</text>
+  <path d="M150,82 L196,82" fill="none" stroke="currentColor" stroke-opacity="0.4" stroke-dasharray="4 3" marker-end="url(#i2)"/>
+  <rect x="200" y="6" width="200" height="38" rx="8" fill="currentColor" fill-opacity="0.06" stroke="currentColor" stroke-opacity="0.5"/>
+  <text x="300" y="24" text-anchor="middle" font-size="10.5" fill="currentColor" font-weight="bold">Valores únicos + frecuencias</text>
+  <text x="300" y="37" text-anchor="middle" font-size="8.5" fill="currentColor" opacity="0.6">texto normalizado</text>
+  <line x1="300" y1="44" x2="300" y2="56" stroke="currentColor" stroke-opacity="0.5" marker-end="url(#i2)"/>
+  <rect x="200" y="58" width="200" height="40" rx="8" fill="currentColor" fill-opacity="0.05" stroke="currentColor" stroke-opacity="0.45" stroke-dasharray="4 3"/>
+  <text x="300" y="76" text-anchor="middle" font-size="10.5" fill="currentColor" font-weight="bold">Pre-clasificar sin tokens</text>
+  <text x="300" y="90" text-anchor="middle" font-size="8.5" fill="currentColor" opacity="0.6">caché, especiales y vacíos</text>
+  <line x1="300" y1="98" x2="300" y2="110" stroke="currentColor" stroke-opacity="0.5" marker-end="url(#i2)"/>
+  <rect x="200" y="112" width="200" height="38" rx="8" fill="currentColor" fill-opacity="0.08" stroke="currentColor" stroke-opacity="0.6"/>
+  <text x="300" y="130" text-anchor="middle" font-size="10.5" fill="currentColor" font-weight="bold">Clasificar el resto con el LLM</text>
+  <text x="300" y="143" text-anchor="middle" font-size="8.5" fill="currentColor" opacity="0.6">en lotes · tolerante a errores de tipeo</text>
+  <line x1="300" y1="150" x2="300" y2="162" stroke="currentColor" stroke-opacity="0.5" marker-end="url(#i2)"/>
+  <polygon points="300,164 370,194 300,224 230,194" fill="currentColor" fill-opacity="0.04" stroke="currentColor" stroke-opacity="0.55"/>
+  <text x="300" y="198" text-anchor="middle" font-size="9.5" fill="currentColor" font-weight="bold">¿cayó en "otros"?</text>
+  <path d="M370,194 L440,194 L440,131 L400,131" fill="none" stroke="currentColor" stroke-opacity="0.45" stroke-dasharray="4 3" marker-end="url(#i2)"/>
+  <text x="386" y="186" font-size="8.5" fill="currentColor" opacity="0.8" font-weight="bold">sí</text>
+  <text x="452" y="165" text-anchor="middle" font-size="7.5" fill="currentColor" opacity="0.6">segunda pasada</text>
+  <line x1="300" y1="224" x2="300" y2="238" stroke="currentColor" stroke-opacity="0.5" marker-end="url(#i2)"/>
+  <text x="310" y="236" font-size="8.5" fill="currentColor" opacity="0.8" font-weight="bold">no</text>
+  <rect x="200" y="240" width="200" height="30" rx="8" fill="currentColor" fill-opacity="0.05" stroke="currentColor" stroke-opacity="0.5"/>
+  <text x="300" y="259" text-anchor="middle" font-size="10" fill="currentColor" font-weight="bold">Revisión del analista</text>
+  <line x1="300" y1="270" x2="300" y2="282" stroke="currentColor" stroke-opacity="0.5" marker-end="url(#i2)"/>
+  <rect x="205" y="284" width="190" height="24" rx="6" fill="currentColor" fill-opacity="0.14" stroke="currentColor" stroke-opacity="0.75" stroke-width="1.4"/>
+  <text x="300" y="300" text-anchor="middle" font-size="10" fill="currentColor" font-weight="bold">▸ Base codificada</text>
 </svg>
 
-Los **refuerzos** son el mecanismo de aprendizaje incremental. Cada vez que el LLM mapea una variación nueva ("cocca-cola" → Coca-Cola), esa relación se guarda en un JSON. La próxima vez, esas variaciones conocidas se inyectan en el prompt. Con el tiempo, el sistema necesita cada vez menos llamadas a la API.
+El sistema resuelve primero lo barato: los valores ya vistos salen de una caché y las respuestas especiales (vacíos, "no sé", "ninguno") se asignan por reglas de procesamiento de lenguaje natural, sin llamar a ningún LLM. Solo el resto va a un modelo, que clasifica en lotes con alta tolerancia a errores de tipeo. Lo que quedó en "otros" pasa por una segunda vuelta más exigente antes de la revisión humana.
+
+Ese trabajo del modelo deja un residuo valioso. Cada vez que mapea una variación nueva ("cocca-cola" a Coca-Cola), la relación se guarda. En la corrida siguiente esas variaciones conocidas ya no necesitan al modelo: se resuelven en la pre-clasificación. Con el transcurrir de las iteraciones, el sistema depende cada vez menos del LLM.
 
 ---
 
-## El flujo de codificación (sin LDC)
+## El flujo de codificación
 
-<svg viewBox="0 0 520 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:520px;display:block;margin:1.5rem auto;font-family:monospace;">
-  <rect width="520" height="380" fill="none"/>
+Cuando no hay libro de códigos, el trabajo es más ambicioso y tiene dos salidas: la base codificada y un libro nuevo. Ese libro es lo que convierte la próxima ola en un problema de imputación.
 
-  <!-- Nodo 1 -->
-  <rect x="60" y="4" width="400" height="56" rx="5" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.5"/>
-  <text x="260" y="22" text-anchor="middle" font-size="10" fill="currentColor" opacity="0.85" font-weight="bold">FASE 1A — Definir categorías</text>
-  <text x="260" y="37" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.55">LLM ve todos los valores únicos + frecuencias</text>
-  <text x="260" y="51" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.55">→ propone 10-25 nombres (sin asignar nada aún)</text>
-  <line x1="260" y1="60" x2="260" y2="80" stroke="currentColor" stroke-width="1" opacity="0.4"/>
-  <polygon points="255,78 265,78 260,86" fill="currentColor" opacity="0.4"/>
-
-  <!-- Nodo 2 edición -->
-  <rect x="60" y="86" width="400" height="44" rx="5" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.45"/>
-  <text x="260" y="104" text-anchor="middle" font-size="10" fill="currentColor" opacity="0.85" font-weight="bold">Edición interactiva de categorías</text>
-  <text x="260" y="120" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.55">Analista agrega, elimina, renombra o fusiona</text>
-  <line x1="260" y1="130" x2="260" y2="150" stroke="currentColor" stroke-width="1" opacity="0.4"/>
-  <polygon points="255,148 265,148 260,156" fill="currentColor" opacity="0.4"/>
-
-  <!-- Nodo 3 -->
-  <rect x="60" y="156" width="400" height="56" rx="5" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.5"/>
-  <text x="260" y="174" text-anchor="middle" font-size="10" fill="currentColor" opacity="0.85" font-weight="bold">FASE 2 — Clasificar valores (batches de 50)</text>
-  <text x="260" y="189" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.55">El LLM no puede inventar categorías nuevas</text>
-  <text x="260" y="203" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.55">Solo asigna a las ya definidas</text>
-  <line x1="260" y1="212" x2="260" y2="232" stroke="currentColor" stroke-width="1" opacity="0.4"/>
-  <polygon points="255,230 265,230 260,238" fill="currentColor" opacity="0.4"/>
-
-  <!-- Rombo -->
-  <polygon points="260,238 340,262 260,286 180,262" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.45"/>
-  <text x="260" y="258" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.8">¿Muchos en</text>
-  <text x="260" y="271" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.8">OTRO? (10+)</text>
-  <line x1="260" y1="286" x2="260" y2="306" stroke="currentColor" stroke-width="1" opacity="0.35" stroke-dasharray="4 3"/>
-  <text x="268" y="300" font-size="8" fill="currentColor" opacity="0.5">SÍ</text>
-  <polygon points="255,304 265,304 260,312" fill="currentColor" opacity="0.35"/>
-
-  <!-- Nodo 4 -->
-  <rect x="60" y="312" width="400" height="56" rx="5" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.45"/>
-  <text x="260" y="330" text-anchor="middle" font-size="10" fill="currentColor" opacity="0.85" font-weight="bold">Revisión final + guardar LDC Excel</text>
-  <text x="260" y="346" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.55">Distribución con frecuencias y % por categoría</text>
-  <text x="260" y="360" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.55">LDC reutilizable para próximas olas</text>
+<svg viewBox="0 0 600 350" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;display:block;margin:1.5rem auto;font-family:monospace;">
+  <defs><marker id="i3" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="currentColor" opacity="0.7"/></marker></defs>
+  <rect x="195" y="6" width="210" height="40" rx="8" fill="currentColor" fill-opacity="0.08" stroke="currentColor" stroke-opacity="0.6"/>
+  <text x="300" y="24" text-anchor="middle" font-size="10.5" fill="currentColor" font-weight="bold">Paso 1 · Proponer categorías</text>
+  <text x="300" y="38" text-anchor="middle" font-size="8.5" fill="currentColor" opacity="0.6">frecuencias como señal · solo nombres</text>
+  <line x1="300" y1="46" x2="300" y2="58" stroke="currentColor" stroke-opacity="0.5" marker-end="url(#i3)"/>
+  <polygon points="300,60 368,88 300,116 232,88" fill="currentColor" fill-opacity="0.04" stroke="currentColor" stroke-opacity="0.55"/>
+  <text x="300" y="92" text-anchor="middle" font-size="9" fill="currentColor" font-weight="bold">¿demasiadas?</text>
+  <path d="M232,88 L150,88 L150,26 L195,26" fill="none" stroke="currentColor" stroke-opacity="0.45" stroke-dasharray="4 3" marker-end="url(#i3)"/>
+  <text x="210" y="80" font-size="8.5" fill="currentColor" opacity="0.8" font-weight="bold">sí</text>
+  <text x="138" y="57" text-anchor="middle" font-size="7.5" fill="currentColor" opacity="0.6" transform="rotate(-90 138 57)">achicar la lista</text>
+  <line x1="300" y1="116" x2="300" y2="128" stroke="currentColor" stroke-opacity="0.5" marker-end="url(#i3)"/>
+  <text x="310" y="127" font-size="8.5" fill="currentColor" opacity="0.8" font-weight="bold">no</text>
+  <rect x="195" y="130" width="210" height="34" rx="8" fill="currentColor" fill-opacity="0.05" stroke="currentColor" stroke-opacity="0.5"/>
+  <text x="300" y="151" text-anchor="middle" font-size="10" fill="currentColor" font-weight="bold">El analista ajusta la lista</text>
+  <line x1="300" y1="164" x2="300" y2="176" stroke="currentColor" stroke-opacity="0.5" marker-end="url(#i3)"/>
+  <rect x="195" y="178" width="210" height="40" rx="8" fill="currentColor" fill-opacity="0.08" stroke="currentColor" stroke-opacity="0.6"/>
+  <text x="300" y="196" text-anchor="middle" font-size="10.5" fill="currentColor" font-weight="bold">Paso 2 · Asignar respuestas</text>
+  <text x="300" y="210" text-anchor="middle" font-size="8.5" fill="currentColor" opacity="0.6">lista fija · no crea categorías nuevas</text>
+  <line x1="300" y1="218" x2="300" y2="230" stroke="currentColor" stroke-opacity="0.5" marker-end="url(#i3)"/>
+  <polygon points="300,232 368,260 300,288 232,260" fill="currentColor" fill-opacity="0.04" stroke="currentColor" stroke-opacity="0.55"/>
+  <text x="300" y="256" text-anchor="middle" font-size="8.5" fill="currentColor" font-weight="bold">¿"otros" excede</text>
+  <text x="300" y="268" text-anchor="middle" font-size="8.5" fill="currentColor" font-weight="bold">el umbral?</text>
+  <path d="M368,260 L434,260 L434,198 L405,198" fill="none" stroke="currentColor" stroke-opacity="0.45" stroke-dasharray="4 3" marker-end="url(#i3)"/>
+  <text x="378" y="252" font-size="8.5" fill="currentColor" opacity="0.8" font-weight="bold">sí</text>
+  <text x="449" y="228" text-anchor="middle" font-size="7.5" fill="currentColor" opacity="0.6" transform="rotate(90 449 228)">re-examinar</text>
+  <line x1="300" y1="288" x2="300" y2="300" stroke="currentColor" stroke-opacity="0.5"/>
+  <text x="310" y="299" font-size="8.5" fill="currentColor" opacity="0.8" font-weight="bold">no</text>
+  <path d="M300,300 L150,300 L150,312" fill="none" stroke="currentColor" stroke-opacity="0.6" marker-end="url(#i3)"/>
+  <rect x="62" y="314" width="176" height="24" rx="6" fill="currentColor" fill-opacity="0.14" stroke="currentColor" stroke-opacity="0.75" stroke-width="1.4"/>
+  <text x="150" y="330" text-anchor="middle" font-size="9.5" fill="currentColor" font-weight="bold">▸ Base codificada</text>
+  <path d="M300,300 L470,300 L470,312" fill="none" stroke="currentColor" stroke-opacity="0.6" marker-end="url(#i3)"/>
+  <rect x="382" y="314" width="176" height="24" rx="6" fill="currentColor" fill-opacity="0.14" stroke="currentColor" stroke-opacity="0.85" stroke-width="1.4"/>
+  <rect x="385" y="317" width="170" height="18" rx="4" fill="none" stroke="currentColor" stroke-opacity="0.4"/>
+  <text x="470" y="330" text-anchor="middle" font-size="9.5" fill="currentColor" font-weight="bold">▸ Libro de códigos nuevo</text>
+  <path d="M558,326 C586,326 586,20 460,20 L405,20" fill="none" stroke="currentColor" stroke-opacity="0.5" stroke-dasharray="5 4" marker-end="url(#i3)"/>
+  <text x="586" y="175" text-anchor="middle" font-size="7.5" fill="currentColor" opacity="0.7" transform="rotate(90 586 175)">la próxima ola ya es imputación</text>
 </svg>
 
-La separación en dos fases —primero definir qué categorías crear, después asignar— es deliberada. Si se hace en un solo paso, el LLM tiende a crear demasiadas categorías específicas o a agrupar de forma inconsistente entre batches. Al fijar primero la lista, el segundo paso tiene un espacio de respuesta constante y produce clasificaciones coherentes.
+La separación en dos pasos es deliberada. Hecho todo junto, el modelo tiende a crear demasiadas categorías específicas o a agrupar de forma inconsistente entre lotes. Al fijar primero la lista de categorías, la asignación posterior trabaja sobre un espacio de respuesta constante y produce clasificaciones coherentes. Entre un paso y otro, el analista corrige la lista: agrega, borra, renombra o fusiona categorías.
 
 ---
 
 ## Las frecuencias como señal de calidad
 
-El LLM solo no siempre detecta bien qué merece categoría propia. Si hay 500 respuestas distintas, "ICBC" puede aparecer 5 veces con 5 grafías diferentes. Cada una parece un caso raro; juntas son una categoría relevante.
+Un modelo, por sí solo, no siempre detecta bien qué merece categoría propia. Entre 500 respuestas distintas, la marca A puede aparecer cinco veces de 5 formas diferentes. Cada una parece un caso raro; juntas son una categoría relevante.
 
-La solución fue pasarle las frecuencias normalizadas junto con los valores. Antes de armar el prompt, normalizo todos los textos (minúsculas, sin acentos, sin puntuación), cuento cuántas veces aparece cada término normalizado, y los más frecuentes van explícitamente al LLM. Esto también ayuda en la revisión interactiva, donde el analista ve el número de ocurrencias y el porcentaje que representa cada categoría. Saber que "OTRO" tiene el 23% de las respuestas es una señal para revisarlo con cuidado.
-
----
-
-## Resiliencia: checkpoints
-
-Procesar mil respuestas implica docenas de llamadas a la API. Si la conexión falla a mitad, no querés empezar desde cero. Después de procesar cada pregunta, el estado completo del DataFrame se guarda en un archivo Parquet junto con un JSON de caché de los valores ya clasificados. Al iniciar, la herramienta busca checkpoints existentes y pregunta si continuar desde donde quedó.
+La solución fue pasar las frecuencias normalizadas junto con los valores. Antes de armar el pedido, se normaliza todo el texto (minúsculas, sin acentos, sin puntuación), se cuenta cuántas veces aparece cada término y los más frecuentes van al modelo. 
 
 ---
 
 ## La interactividad no es un defecto, es el producto
 
-Una decisión de diseño que fui entendiendo con el tiempo: la automatización total no es el objetivo. El objetivo es que el analista confíe en el resultado para defenderlo ante el cliente.
+La automatización total nunca fue el objetivo. Logramos una herramienta eficaz y eficiente que facilita la actividad del analista mientras garantiza un agrupamiento de mayor calidad.
 
-Antes de clasificar, el analista puede editar las categorías propuestas. Después de clasificar, puede revisar cada categoría y mover los valores mal asignados. Antes de guardar, ve una distribución completa con frecuencias y porcentajes.
+Antes de clasificar puede editar las categorías propuestas. Después de clasificar puede revisar cada categoría y mover los valores mal asignados. Antes de guardar ve la distribución completa con frecuencias y porcentajes. El modelo elimina el trabajo mecánico; el analista aporta el criterio.
 
-Lo que el LLM hace es eliminar el trabajo mecánico. Lo que el analista hace es tomar las decisiones que requieren criterio de dominio: si "Light" y "Light & Fit" deben ser la misma categoría o categorías separadas, qué hacer con las respuestas que critican el estudio en vez de responder la pregunta.
-
----
-
-## Resultado en producción
-
-Una base con 1.500 respuestas a 4 preguntas abiertas que antes tomaba entre 4 y 6 horas de trabajo manual ahora toma entre 25 y 45 minutos: 15-25 de procesamiento automático y 10-20 de revisión interactiva. La detección de variantes ortográficas es más robusta que la humana en casos de errores de tipeo poco obvios, y no hay deriva de consistencia a lo largo de sesiones largas.
+Este proyecto refleja cómo se cruzan ciencia de datos, desarrollo de software e investigación de mercado para acortar la brecha entre la voz de los usuarios y los insights que necesitan las marcas. Si te enfrentaste al mismo desafío en procesamiento de texto, me interesa saber qué enfoques te funcionaron.

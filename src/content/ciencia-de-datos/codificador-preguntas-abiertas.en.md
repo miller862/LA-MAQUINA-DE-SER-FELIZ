@@ -1,7 +1,7 @@
 ---
-title: "Open-ended survey coder with NLP and language models"
-date: "2025-06-18"
-description: "How I built a Python tool that uses GPT-4o to solve one of the most tedious problems in quantitative research: turning free-text responses into analyzable data."
+title: "Coding open-ended responses with natural language processing and language models"
+date: "2026-07-10"
+description: "When saving costs and time coincides with a gain in effectiveness. How we use natural language processing (NLP) techniques and language models to code open-ended responses with a focus on the research question."
 tags: ["python", "nlp", "ia"]
 lang: "en"
 postId: "codificador-preguntas-abiertas"
@@ -10,200 +10,166 @@ draft: false
 ---
 
 <div style="margin-bottom:2.5rem;border-radius:12px;overflow:hidden;background:#0c0f0c;">
-  <img src="/img/banner-codificador.svg" alt="Open-ended survey coder" style="width:100%;display:block;height:auto;" />
+  <img src="/img/cover-codificador.svg" alt="Open-ended survey coder" style="width:100%;display:block;height:auto;" />
 </div>
 
-In quantitative research, everyone hates open-ended questions. Every other element in a survey produces numbers directly: 1-to-10 scales, multiple choice, net promoter scores. But open-ended questions produce free text, and free text doesn't fit into a regression or a crosstab. The person who hates them most is probably whoever has to code the responses.
+In market research, open-ended questions are a double-edged sword: they capture a richness and specificity that's desirable, but quantifying them is always a challenge because of the ambiguity, semantic variety, and spelling errors they carry. At Moiguer we built our own in-house solution to this age-old problem in opinion surveys, developing our own software to code open-ended responses.
 
-To convert them into data, there's a process called **coding**: someone reads all the responses, groups the ones that say the same thing, assigns a number to each group, and replaces the text with that number in the database. "Hellmanns", "the yellow lid one", and "hellmans (sic)" all become code 5, which corresponds to Hellmann's.
+To turn free text into data there's a process called **coding**. Someone reads all the responses, groups the ones that say the same thing, assigns a number to each group, and replaces the text with that number in the database. "Hellmanns", "Jelman", and "hellmans" all end up under a single code, the one for Hellmann's.
 
-It's tedious, repetitive, and prone to consistency errors. When you're dealing with thousands of responses to multiple questions across several parallel projects, it's also expensive. I automated it.
+It's tedious, repetitive work, prone to consistency errors. When you're dealing with thousands of responses to multiple questions, across several projects running in parallel, it's also expensive and inefficient. That was the starting point.
 
----
-
-## The problem in all its complexity
-
-There are two fundamentally different situations with any open-ended question:
-
-**When a codebook already exists.** In longitudinal studies, panels, or multi-wave projects, someone already defined the categories in a previous round. There's a file — the codebook — with a list of numeric keys and their canonical values. The task here is *imputation*: take each new response and map it to the right key. The main challenge is orthographic variability. "Cocca-cola", "coca cola", "CocaCola", and "the black one" are all key 7.
-
-**When no codebook exists.** In new studies or questions that have never been asked before, the categories need to be invented from scratch. The analyst doesn't know in advance what they'll find. First discover what categories emerge from the data, then assign each response to one, then generate a reusable codebook for future waves.
-
-Both flows share infrastructure but have completely different logic.
+The goal was to increase efficiency (of resources and time) without losing effectiveness (I mean the fidelity of the final result) and, if possible, to increase it.
 
 ---
 
-## A problem nobody talks about: the multi-value response
+## Two problems, not one
 
-There's a third problem that doesn't appear in coding textbooks but shows up constantly in real data.
+Every open-ended question falls into one of two situations, and each demands a different logic.
 
-Imagine a question: *"What qualities should a good football player have?"* One respondent answers: *"Speed, technique, and grit"*. Another: *"Attitude and commitment to the team"*.
+**When a codebook already exists.** In longitudinal studies, panels, or multi-wave projects, the categories were defined in an earlier round. There's a file (the codebook) with a list of numeric keys and their corresponding values. The task is *imputation*: take each new response and map it to the right key. The core challenge is spelling variability: "Cocca-cola", "coca cola", and "CocaCola" all refer to the same key.
 
-The first mentioned three things. The second mentioned two. But in the data file, both responses occupy a single cell. If we code that cell as a unit, we lose mentions. In a brand image or product attribute study, those lost mentions can change the results.
+**When no codebook exists.** In new studies, or questions that have never been asked, the categories have to be *coded* from scratch. The analyst doesn't know in advance what they'll find — they might have a hunch, but if they try to predefine the codebook they risk introducing their own bias over what respondents actually said. First you have to discover what categories emerge from the data, then assign each response to one, and finally produce a reusable codebook for the next waves.
 
-The solution I developed is **ad-hoc expansion**: detect when a response contains multiple real mentions, split them, and distribute them into additional columns. The original column (`Q23`) keeps the first mention (top of mind), and new columns are created (`Q23adhoc2`, `Q23adhoc3`, etc.) for the rest. Detection can't rely on regex alone — a comma can separate mentions or be part of a narrative phrase — so the final decision goes to a language model trained for these situations.
+Both flows share infrastructure but solve different things. The distinction matters: imputation follows a pattern that already exists, while coding manufactures one.
 
----
-
-## The architecture
-
-<svg viewBox="0 0 600 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;display:block;margin:1.5rem auto;">
-  <rect width="600" height="120" fill="none"/>
-  <!-- main box -->
-  <rect x="150" y="4" width="300" height="38" rx="5" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.5"/>
-  <text x="300" y="18" text-anchor="middle" font-family="monospace" font-size="10" fill="currentColor" opacity="0.9" font-weight="bold">main.py</text>
-  <text x="300" y="32" text-anchor="middle" font-family="monospace" font-size="9" fill="currentColor" opacity="0.55">Select project → Load → Question menu</text>
-  <!-- flechas hacia abajo -->
-  <line x1="220" y1="42" x2="160" y2="68" stroke="currentColor" stroke-width="1" opacity="0.4"/>
-  <line x1="380" y1="42" x2="440" y2="68" stroke="currentColor" stroke-width="1" opacity="0.4"/>
-  <!-- imputation box -->
-  <rect x="60" y="68" width="200" height="34" rx="5" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.4"/>
-  <text x="160" y="82" text-anchor="middle" font-family="monospace" font-size="10" fill="currentColor" opacity="0.8" font-weight="bold">IMPUTATION</text>
-  <text x="160" y="95" text-anchor="middle" font-family="monospace" font-size="8.5" fill="currentColor" opacity="0.5">Codebook exists → assign keys</text>
-  <!-- codification box -->
-  <rect x="340" y="68" width="200" height="34" rx="5" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.4"/>
-  <text x="440" y="82" text-anchor="middle" font-family="monospace" font-size="10" fill="currentColor" opacity="0.8" font-weight="bold">CODIFICATION</text>
-  <text x="440" y="95" text-anchor="middle" font-family="monospace" font-size="8.5" fill="currentColor" opacity="0.5">No codebook → create categories</text>
+<svg viewBox="0 0 600 270" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;display:block;margin:1.5rem auto;font-family:monospace;">
+  <defs><marker id="d1" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="currentColor" opacity="0.7"/></marker></defs>
+  <rect x="215" y="6" width="170" height="36" rx="8" fill="currentColor" fill-opacity="0.06" stroke="currentColor" stroke-opacity="0.5"/>
+  <text x="300" y="24" text-anchor="middle" font-size="11" fill="currentColor" font-weight="bold">Load project</text>
+  <text x="300" y="37" text-anchor="middle" font-size="8.5" fill="currentColor" opacity="0.6">and pick questions</text>
+  <line x1="300" y1="42" x2="300" y2="58" stroke="currentColor" stroke-opacity="0.5" marker-end="url(#d1)"/>
+  <polygon points="300,60 375,92 300,124 225,92" fill="currentColor" fill-opacity="0.04" stroke="currentColor" stroke-opacity="0.55"/>
+  <text x="300" y="90" text-anchor="middle" font-size="10" fill="currentColor" font-weight="bold">is there a</text>
+  <text x="300" y="103" text-anchor="middle" font-size="10" fill="currentColor" font-weight="bold">codebook?</text>
+  <path d="M225,92 L150,92 L150,142" fill="none" stroke="currentColor" stroke-opacity="0.5" marker-end="url(#d1)"/>
+  <text x="185" y="84" font-size="8.5" fill="currentColor" opacity="0.8" font-weight="bold">yes</text>
+  <rect x="65" y="144" width="170" height="44" rx="8" fill="currentColor" fill-opacity="0.09" stroke="currentColor" stroke-opacity="0.65"/>
+  <text x="150" y="163" text-anchor="middle" font-size="11" fill="currentColor" font-weight="bold">Imputation</text>
+  <text x="150" y="178" text-anchor="middle" font-size="8.5" fill="currentColor" opacity="0.6">use the codes that already exist</text>
+  <path d="M375,92 L450,92 L450,142" fill="none" stroke="currentColor" stroke-opacity="0.5" marker-end="url(#d1)"/>
+  <text x="415" y="84" font-size="8.5" fill="currentColor" opacity="0.8" font-weight="bold">no</text>
+  <rect x="365" y="144" width="170" height="44" rx="8" fill="currentColor" fill-opacity="0.09" stroke="currentColor" stroke-opacity="0.65"/>
+  <text x="450" y="163" text-anchor="middle" font-size="11" fill="currentColor" font-weight="bold">Coding</text>
+  <text x="450" y="178" text-anchor="middle" font-size="8.5" fill="currentColor" opacity="0.6">build the codes from scratch</text>
+  <path d="M150,188 L150,224 L290,224" fill="none" stroke="currentColor" stroke-opacity="0.4" marker-end="url(#d1)"/>
+  <path d="M450,188 L450,224 L310,224" fill="none" stroke="currentColor" stroke-opacity="0.4" marker-end="url(#d1)"/>
+  <rect x="215" y="228" width="170" height="36" rx="8" fill="currentColor" fill-opacity="0.06" stroke="currentColor" stroke-opacity="0.5"/>
+  <text x="300" y="246" text-anchor="middle" font-size="10.5" fill="currentColor" font-weight="bold">Coded dataset</text>
+  <text x="300" y="259" text-anchor="middle" font-size="8.5" fill="currentColor" opacity="0.6">and a codebook ready for the next wave</text>
 </svg>
 
 ---
 
-## Multi-project and per-project configuration
+## Multiple projects, multiple responses
 
-The tool wasn't designed for a single study. The initial menu lists all available projects in a central folder. Each project has its own structure:
+The tool wasn't designed for a single study. The initial menu lists every project in a central folder, and each one has its own structure: input data, the codebook, learned variants, and results with their checkpoints. Subprojects are detected automatically, and when files follow a wave pattern the tool asks which wave to process. Each project can also have its own special codes.
 
-```
-projects/
-  PROJECT_A/
-    data/          ← input Excel files
-    LDC/           ← codebook(s)
-    REINFORCEMENTS/ ← learned variants
-    outputs/       ← results + checkpoints
-  PROJECT_B/
-    subproject_a/           
-    subproject_b/            
-```
-
-Subprojects are detected automatically. If files follow the pattern `PROJECT1.xlsx`, `PROJECT2.xlsx`, it also asks for the wave number. Each project can have its own special codes.
+No matter how clearly a question is worded, as long as questions keep being answered by people with agency of their own, there will always be room for free interpretation (and let's hope it stays that way), which often means the respondent answers with more than one factor packed into a single response. For example, faced with the question "What do you find most attractive about this product?", a respondent might answer: "I like its packaging and the variety it offers." We designed a logic to capture both dimensions, packaging and variety, distinguishing between the top-of-mind or primary driver and secondary ones.
 
 ---
 
 ## The imputation flow
 
-<svg viewBox="0 0 520 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:520px;display:block;margin:1.5rem auto;font-family:monospace;">
-  <rect width="520" height="340" fill="none"/>
+When the codebook already exists, it comes in as a read-only input. The goal is a single output: the coded dataset.
 
-  <!-- Node 1 -->
-  <rect x="60" y="4" width="400" height="44" rx="5" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.5"/>
-  <text x="260" y="22" text-anchor="middle" font-size="10" fill="currentColor" opacity="0.85" font-weight="bold">Automatic detection of specials</text>
-  <text x="260" y="38" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.55">"don't know", "none", blanks → assigned without LLM</text>
-  <line x1="260" y1="48" x2="260" y2="68" stroke="currentColor" stroke-width="1" opacity="0.4"/>
-  <polygon points="255,66 265,66 260,74" fill="currentColor" opacity="0.4"/>
-
-  <!-- Node 2 -->
-  <rect x="60" y="74" width="400" height="44" rx="5" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.5"/>
-  <text x="260" y="92" text-anchor="middle" font-size="10" fill="currentColor" opacity="0.85" font-weight="bold">LLM classification in batches of 50</text>
-  <text x="260" y="108" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.55">Prompt: full codebook + reinforcements + phonetic examples</text>
-  <line x1="260" y1="118" x2="260" y2="138" stroke="currentColor" stroke-width="1" opacity="0.4"/>
-  <polygon points="255,136 265,136 260,144" fill="currentColor" opacity="0.4"/>
-
-  <!-- Decision diamond -->
-  <polygon points="260,144 340,168 260,192 180,168" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.45"/>
-  <text x="260" y="164" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.8">Assigned</text>
-  <text x="260" y="177" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.8">to OTHER?</text>
-  <!-- YES -->
-  <line x1="260" y1="192" x2="260" y2="212" stroke="currentColor" stroke-width="1" opacity="0.35" stroke-dasharray="4 3"/>
-  <text x="268" y="206" font-size="8" fill="currentColor" opacity="0.5">YES</text>
-  <polygon points="255,210 265,210 260,218" fill="currentColor" opacity="0.35"/>
-
-  <!-- Node 3 -->
-  <rect x="60" y="218" width="400" height="44" rx="5" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.45"/>
-  <text x="260" y="236" text-anchor="middle" font-size="10" fill="currentColor" opacity="0.85" font-weight="bold">Second pass (batches of 20)</text>
-  <text x="260" y="252" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.55">Reclassifies with real examples from each category</text>
-  <line x1="260" y1="262" x2="260" y2="282" stroke="currentColor" stroke-width="1" opacity="0.4"/>
-  <polygon points="255,280 265,280 260,288" fill="currentColor" opacity="0.4"/>
-
-  <!-- Node 4 -->
-  <rect x="60" y="288" width="400" height="44" rx="5" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.45"/>
-  <text x="260" y="306" text-anchor="middle" font-size="10" fill="currentColor" opacity="0.85" font-weight="bold">Interactive review + save</text>
-  <text x="260" y="322" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.55">Analyst approves, edits or moves · accumulates reinforcements</text>
+<svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;display:block;margin:1.5rem auto;font-family:monospace;">
+  <defs><marker id="i2" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="currentColor" opacity="0.7"/></marker></defs>
+  <rect x="30" y="60" width="120" height="44" rx="8" fill="none" stroke="currentColor" stroke-opacity="0.4" stroke-dasharray="4 3"/>
+  <text x="90" y="80" text-anchor="middle" font-size="9.5" fill="currentColor" opacity="0.75" font-weight="bold">Codebook</text>
+  <text x="90" y="94" text-anchor="middle" font-size="8" fill="currentColor" opacity="0.55">input (read-only)</text>
+  <path d="M150,82 L196,82" fill="none" stroke="currentColor" stroke-opacity="0.4" stroke-dasharray="4 3" marker-end="url(#i2)"/>
+  <rect x="200" y="6" width="200" height="38" rx="8" fill="currentColor" fill-opacity="0.06" stroke="currentColor" stroke-opacity="0.5"/>
+  <text x="300" y="24" text-anchor="middle" font-size="10.5" fill="currentColor" font-weight="bold">Unique values + frequencies</text>
+  <text x="300" y="37" text-anchor="middle" font-size="8.5" fill="currentColor" opacity="0.6">normalized text</text>
+  <line x1="300" y1="44" x2="300" y2="56" stroke="currentColor" stroke-opacity="0.5" marker-end="url(#i2)"/>
+  <rect x="200" y="58" width="200" height="40" rx="8" fill="currentColor" fill-opacity="0.05" stroke="currentColor" stroke-opacity="0.45" stroke-dasharray="4 3"/>
+  <text x="300" y="76" text-anchor="middle" font-size="10.5" fill="currentColor" font-weight="bold">Pre-classify without tokens</text>
+  <text x="300" y="90" text-anchor="middle" font-size="8.5" fill="currentColor" opacity="0.6">cache, specials, and blanks</text>
+  <line x1="300" y1="98" x2="300" y2="110" stroke="currentColor" stroke-opacity="0.5" marker-end="url(#i2)"/>
+  <rect x="200" y="112" width="200" height="38" rx="8" fill="currentColor" fill-opacity="0.08" stroke="currentColor" stroke-opacity="0.6"/>
+  <text x="300" y="130" text-anchor="middle" font-size="10.5" fill="currentColor" font-weight="bold">Classify the rest with the LLM</text>
+  <text x="300" y="143" text-anchor="middle" font-size="8.5" fill="currentColor" opacity="0.6">in batches · tolerant to typos</text>
+  <line x1="300" y1="150" x2="300" y2="162" stroke="currentColor" stroke-opacity="0.5" marker-end="url(#i2)"/>
+  <polygon points="300,164 370,194 300,224 230,194" fill="currentColor" fill-opacity="0.04" stroke="currentColor" stroke-opacity="0.55"/>
+  <text x="300" y="198" text-anchor="middle" font-size="9.5" fill="currentColor" font-weight="bold">landed in "other"?</text>
+  <path d="M370,194 L440,194 L440,131 L400,131" fill="none" stroke="currentColor" stroke-opacity="0.45" stroke-dasharray="4 3" marker-end="url(#i2)"/>
+  <text x="386" y="186" font-size="8.5" fill="currentColor" opacity="0.8" font-weight="bold">yes</text>
+  <text x="452" y="165" text-anchor="middle" font-size="7.5" fill="currentColor" opacity="0.6">second pass</text>
+  <line x1="300" y1="224" x2="300" y2="238" stroke="currentColor" stroke-opacity="0.5" marker-end="url(#i2)"/>
+  <text x="310" y="236" font-size="8.5" fill="currentColor" opacity="0.8" font-weight="bold">no</text>
+  <rect x="200" y="240" width="200" height="30" rx="8" fill="currentColor" fill-opacity="0.05" stroke="currentColor" stroke-opacity="0.5"/>
+  <text x="300" y="259" text-anchor="middle" font-size="10" fill="currentColor" font-weight="bold">Analyst review</text>
+  <line x1="300" y1="270" x2="300" y2="282" stroke="currentColor" stroke-opacity="0.5" marker-end="url(#i2)"/>
+  <rect x="205" y="284" width="190" height="24" rx="6" fill="currentColor" fill-opacity="0.14" stroke="currentColor" stroke-opacity="0.75" stroke-width="1.4"/>
+  <text x="300" y="300" text-anchor="middle" font-size="10" fill="currentColor" font-weight="bold">▸ Coded dataset</text>
 </svg>
 
-**Reinforcements** are the incremental learning mechanism. Every time the LLM maps a new variation ("cocca-cola" → Coca-Cola), that relationship is saved in a JSON. The next time, those known variations are injected into the prompt. Over time, the system needs fewer and fewer API calls.
+The system handles the cheap part first: already-seen values come from a cache, and special responses (blanks, "don't know", "none") are assigned by natural language processing rules, without calling any LLM. Only the rest goes to a model, which classifies in batches with high tolerance for typos. Whatever landed in "other" gets a stricter second pass before human review.
+
+That work by the model leaves a valuable residue. Every time it maps a new variation ("cocca-cola" to Coca-Cola), the relationship is saved. On the next run those known variations no longer need the model: they're resolved in pre-classification. As iterations go by, the system relies less and less on the LLM.
 
 ---
 
-## The codification flow (no codebook)
+## The coding flow
 
-<svg viewBox="0 0 520 380" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:520px;display:block;margin:1.5rem auto;font-family:monospace;">
-  <rect width="520" height="380" fill="none"/>
+When there's no codebook, the work is more ambitious and has two outputs: the coded dataset and a new codebook. That codebook is what turns the next wave into an imputation problem.
 
-  <!-- Node 1 -->
-  <rect x="60" y="4" width="400" height="56" rx="5" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.5"/>
-  <text x="260" y="22" text-anchor="middle" font-size="10" fill="currentColor" opacity="0.85" font-weight="bold">PHASE 1A — Define categories</text>
-  <text x="260" y="37" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.55">LLM sees all unique values + normalized frequencies</text>
-  <text x="260" y="51" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.55">→ proposes 10-25 names (assigns nothing yet)</text>
-  <line x1="260" y1="60" x2="260" y2="80" stroke="currentColor" stroke-width="1" opacity="0.4"/>
-  <polygon points="255,78 265,78 260,86" fill="currentColor" opacity="0.4"/>
-
-  <!-- Node 2 -->
-  <rect x="60" y="86" width="400" height="44" rx="5" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.45"/>
-  <text x="260" y="104" text-anchor="middle" font-size="10" fill="currentColor" opacity="0.85" font-weight="bold">Interactive category editing</text>
-  <text x="260" y="120" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.55">Analyst adds, deletes, renames or merges</text>
-  <line x1="260" y1="130" x2="260" y2="150" stroke="currentColor" stroke-width="1" opacity="0.4"/>
-  <polygon points="255,148 265,148 260,156" fill="currentColor" opacity="0.4"/>
-
-  <!-- Node 3 -->
-  <rect x="60" y="156" width="400" height="56" rx="5" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.5"/>
-  <text x="260" y="174" text-anchor="middle" font-size="10" fill="currentColor" opacity="0.85" font-weight="bold">PHASE 2 — Classify values (batches of 50)</text>
-  <text x="260" y="189" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.55">LLM cannot invent new categories</text>
-  <text x="260" y="203" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.55">Only assigns to already-defined ones</text>
-  <line x1="260" y1="212" x2="260" y2="232" stroke="currentColor" stroke-width="1" opacity="0.4"/>
-  <polygon points="255,230 265,230 260,238" fill="currentColor" opacity="0.4"/>
-
-  <!-- Diamond -->
-  <polygon points="260,238 340,262 260,286 180,262" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.45"/>
-  <text x="260" y="258" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.8">Many in</text>
-  <text x="260" y="271" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.8">OTHER? (10+)</text>
-  <line x1="260" y1="286" x2="260" y2="306" stroke="currentColor" stroke-width="1" opacity="0.35" stroke-dasharray="4 3"/>
-  <text x="268" y="300" font-size="8" fill="currentColor" opacity="0.5">YES</text>
-  <polygon points="255,304 265,304 260,312" fill="currentColor" opacity="0.35"/>
-
-  <!-- Node 4 -->
-  <rect x="60" y="312" width="400" height="56" rx="5" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.45"/>
-  <text x="260" y="330" text-anchor="middle" font-size="10" fill="currentColor" opacity="0.85" font-weight="bold">Final review + save codebook Excel</text>
-  <text x="260" y="346" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.55">Distribution with frequencies and % per category</text>
-  <text x="260" y="360" text-anchor="middle" font-size="9" fill="currentColor" opacity="0.55">Reusable codebook for future waves</text>
+<svg viewBox="0 0 600 350" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:600px;display:block;margin:1.5rem auto;font-family:monospace;">
+  <defs><marker id="i3" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="currentColor" opacity="0.7"/></marker></defs>
+  <rect x="195" y="6" width="210" height="40" rx="8" fill="currentColor" fill-opacity="0.08" stroke="currentColor" stroke-opacity="0.6"/>
+  <text x="300" y="24" text-anchor="middle" font-size="10.5" fill="currentColor" font-weight="bold">Step 1 · Propose categories</text>
+  <text x="300" y="38" text-anchor="middle" font-size="8.5" fill="currentColor" opacity="0.6">frequencies as signal · names only</text>
+  <line x1="300" y1="46" x2="300" y2="58" stroke="currentColor" stroke-opacity="0.5" marker-end="url(#i3)"/>
+  <polygon points="300,60 368,88 300,116 232,88" fill="currentColor" fill-opacity="0.04" stroke="currentColor" stroke-opacity="0.55"/>
+  <text x="300" y="92" text-anchor="middle" font-size="9" fill="currentColor" font-weight="bold">too many?</text>
+  <path d="M232,88 L150,88 L150,26 L195,26" fill="none" stroke="currentColor" stroke-opacity="0.45" stroke-dasharray="4 3" marker-end="url(#i3)"/>
+  <text x="210" y="80" font-size="8.5" fill="currentColor" opacity="0.8" font-weight="bold">yes</text>
+  <text x="138" y="57" text-anchor="middle" font-size="7.5" fill="currentColor" opacity="0.6" transform="rotate(-90 138 57)">trim the list</text>
+  <line x1="300" y1="116" x2="300" y2="128" stroke="currentColor" stroke-opacity="0.5" marker-end="url(#i3)"/>
+  <text x="310" y="127" font-size="8.5" fill="currentColor" opacity="0.8" font-weight="bold">no</text>
+  <rect x="195" y="130" width="210" height="34" rx="8" fill="currentColor" fill-opacity="0.05" stroke="currentColor" stroke-opacity="0.5"/>
+  <text x="300" y="151" text-anchor="middle" font-size="10" fill="currentColor" font-weight="bold">Analyst adjusts the list</text>
+  <line x1="300" y1="164" x2="300" y2="176" stroke="currentColor" stroke-opacity="0.5" marker-end="url(#i3)"/>
+  <rect x="195" y="178" width="210" height="40" rx="8" fill="currentColor" fill-opacity="0.08" stroke="currentColor" stroke-opacity="0.6"/>
+  <text x="300" y="196" text-anchor="middle" font-size="10.5" fill="currentColor" font-weight="bold">Step 2 · Assign responses</text>
+  <text x="300" y="210" text-anchor="middle" font-size="8.5" fill="currentColor" opacity="0.6">fixed list · no new categories</text>
+  <line x1="300" y1="218" x2="300" y2="230" stroke="currentColor" stroke-opacity="0.5" marker-end="url(#i3)"/>
+  <polygon points="300,232 368,260 300,288 232,260" fill="currentColor" fill-opacity="0.04" stroke="currentColor" stroke-opacity="0.55"/>
+  <text x="300" y="256" text-anchor="middle" font-size="8.5" fill="currentColor" font-weight="bold">"other" over</text>
+  <text x="300" y="268" text-anchor="middle" font-size="8.5" fill="currentColor" font-weight="bold">the threshold?</text>
+  <path d="M368,260 L434,260 L434,198 L405,198" fill="none" stroke="currentColor" stroke-opacity="0.45" stroke-dasharray="4 3" marker-end="url(#i3)"/>
+  <text x="378" y="252" font-size="8.5" fill="currentColor" opacity="0.8" font-weight="bold">yes</text>
+  <text x="449" y="228" text-anchor="middle" font-size="7.5" fill="currentColor" opacity="0.6" transform="rotate(90 449 228)">re-examine</text>
+  <line x1="300" y1="288" x2="300" y2="300" stroke="currentColor" stroke-opacity="0.5"/>
+  <text x="310" y="299" font-size="8.5" fill="currentColor" opacity="0.8" font-weight="bold">no</text>
+  <path d="M300,300 L150,300 L150,312" fill="none" stroke="currentColor" stroke-opacity="0.6" marker-end="url(#i3)"/>
+  <rect x="62" y="314" width="176" height="24" rx="6" fill="currentColor" fill-opacity="0.14" stroke="currentColor" stroke-opacity="0.75" stroke-width="1.4"/>
+  <text x="150" y="330" text-anchor="middle" font-size="9.5" fill="currentColor" font-weight="bold">▸ Coded dataset</text>
+  <path d="M300,300 L470,300 L470,312" fill="none" stroke="currentColor" stroke-opacity="0.6" marker-end="url(#i3)"/>
+  <rect x="382" y="314" width="176" height="24" rx="6" fill="currentColor" fill-opacity="0.14" stroke="currentColor" stroke-opacity="0.85" stroke-width="1.4"/>
+  <rect x="385" y="317" width="170" height="18" rx="4" fill="none" stroke="currentColor" stroke-opacity="0.4"/>
+  <text x="470" y="330" text-anchor="middle" font-size="9.5" fill="currentColor" font-weight="bold">▸ New codebook</text>
+  <path d="M558,326 C586,326 586,20 460,20 L405,20" fill="none" stroke="currentColor" stroke-opacity="0.5" stroke-dasharray="5 4" marker-end="url(#i3)"/>
+  <text x="586" y="175" text-anchor="middle" font-size="7.5" fill="currentColor" opacity="0.7" transform="rotate(90 586 175)">the next wave is now imputation</text>
 </svg>
 
-The two-phase separation is deliberate. If done in a single step, the LLM tends to create too many specific categories or groups inconsistently across batches. By fixing the list first, the second step has a constant response space and produces coherent classifications.
+The split into two steps is deliberate. Done all at once, the model tends to create too many overly specific categories or to group inconsistently across batches. By fixing the category list first, the later assignment works over a constant response space and produces coherent classifications. Between one step and the next, the analyst corrects the list: adding, deleting, renaming, or merging categories.
 
 ---
 
 ## Frequencies as a quality signal
 
-The LLM alone doesn't always detect well what deserves its own category. If there are 500 distinct responses, "ICBC" might appear 5 times with 5 different spellings. Each one looks like a rare case; together they're a relevant category.
+A model, on its own, doesn't always detect well what deserves its own category. Among 500 distinct responses, brand A might appear five times in 5 different spellings. Each one looks like a rare case; together they're a relevant category.
 
-The solution was passing normalized frequencies alongside the values. Before building the prompt, I normalize all texts (lowercase, no accents, no punctuation), count how many times each normalized term appears, and send the most frequent ones explicitly to the LLM. This also helps in interactive review, where the analyst sees occurrence counts and the percentage each category represents. Knowing that "OTHER" holds 23% of responses is a signal to review it carefully.
-
----
-
-## Resilience: checkpoints
-
-Processing a thousand responses means dozens of API calls. If the connection fails midway, you don't want to start from scratch. After processing each question, the full DataFrame state is saved in a Parquet file along with a JSON cache of already-classified values. At startup, the tool looks for existing checkpoints and asks whether to continue from where it left off.
+The solution was to pass normalized frequencies along with the values. Before building the request, all the text is normalized (lowercase, no accents, no punctuation), each term's frequency is counted, and the most frequent ones go to the model.
 
 ---
 
-## Interactivity isn't a defect, it's the product
+## Interactivity isn't a flaw, it's the product
 
-A design decision I came to understand over time: full automation isn't the goal. The goal is for the analyst to trust the result enough to defend it to the client.
+Full automation was never the goal. What we achieved is an effective, efficient tool that eases the analyst's work while guaranteeing higher-quality grouping.
 
-Before classifying, the analyst can edit the proposed categories. After classifying, they can review each category and move misassigned values. Before saving, they see a complete distribution with frequencies and percentages.
+Before classifying, they can edit the proposed categories. After classifying, they can review each category and move misassigned values. Before saving, they see the full distribution with frequencies and percentages. The model removes the mechanical work; the analyst brings the judgment.
 
-What the LLM does is eliminate mechanical work. What the analyst does is make the decisions that require domain judgment: whether "Light" and "Light & Fit" should be the same category or separate ones, what to do with responses that criticize the survey instead of answering the question.
-
----
-
-## Production results
-
-A dataset with 1,500 responses to 4 open-ended questions that previously took 4 to 6 hours now takes 25 to 45 minutes: 15-25 of automatic processing and 10-20 of interactive review. Orthographic variant detection is more robust than human detection for non-obvious typos, and there's no consistency drift across long sessions.
+This project reflects how data science, software development, and market research intersect to close the gap between the voice of users and the insights brands need. If you've faced the same challenge in text processing, I'd like to hear which approaches worked for you.
