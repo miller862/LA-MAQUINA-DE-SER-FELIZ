@@ -3,7 +3,7 @@ title: "Por qué deberían preocuparnos la desaparición de los rituales"
 date: "2026-06-18"
 description: "No todo lo que es oro brilla. Hay un riesgo que corremos de llegar al final de nuestra historia sin habernos detenido a hacer habitable el tiempo."
 tags: ["filosofia", "opinion"]
-cover: "/img/linea_curva.svg"
+cover: "/img/retratos/retrato-han.jpg"
 lang: es
 postId: rituales
 podcastEpisodeUrl: "https://player.rss.com/la-maquina-de-ser-feliz/2905651?theme=dark&v=2"

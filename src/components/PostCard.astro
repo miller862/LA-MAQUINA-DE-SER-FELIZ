@@ -43,7 +43,7 @@ const canonicalTagKeys = tags.map(tagKey).join(',');
   data-tag-keys={canonicalTagKeys}
 >
   <a href={href} class="card-link">
-    <div class="card-cover" style={cover ? (cover.endsWith('.svg') ? `background: ${noCoverGradient};` : ``) : `background: ${noCoverGradient};`}>
+    <div class="card-cover" style={cover ? (cover.endsWith('.svg') ? `background: var(--cover-svg-bg);` : ``) : `background: ${noCoverGradient};`}>
       {cover
         ? <img src={cover} alt={title} loading="lazy" class={cover.endsWith('.svg') ? 'cover-svg' : ''} />
         : <span class="card-cover__placeholder">
@@ -144,6 +144,8 @@ const canonicalTagKeys = tags.map(tagKey).join(',');
 
   /* COVER */
   .card-cover {
+    /* mismo negro que el fondo del SVG de portada, para que el panel quede sin costura */
+    --cover-svg-bg: #0c0f0c;
     position: relative;
     overflow: hidden;
     background: var(--color-bg-muted);
@@ -161,11 +163,11 @@ const canonicalTagKeys = tags.map(tagKey).join(',');
   }
   .post-card:hover .card-cover img { transform: scale(1.05); }
 
-  /* SVG covers: centrado sin recorte, sobre el gradiente de la vertical */
+  /* SVG covers: centrado sin recorte; el fondo del propio SVG llena todo el panel */
   .card-cover img.cover-svg {
     object-fit: contain;
-    padding: 1.25rem;
-    opacity: 0.92;
+    position: absolute;
+    inset: 0;
   }
   .post-card:hover .card-cover img.cover-svg { transform: scale(1.03); }
 

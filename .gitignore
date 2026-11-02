@@ -1,4 +1,4 @@
-node_modules/
+﻿node_modules/
 dist/
 .env
 .env.*
@@ -8,3 +8,12 @@ Thumbs.db
 *.log
 .astro/
 Escritos e ideas/
+
+# retratos: el prompt y los originales pesados no se suben
+public/img/retratos/prompt_*
+public/img/retratos/original-*
+
+# ningun Word va al repo
+*.docx
+*.doc
+*.dotx

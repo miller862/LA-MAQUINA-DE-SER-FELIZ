@@ -37,7 +37,7 @@ const minutes = readingTime(entry.body);
       </div>
     )}
 
-    <div class="post-content prose">
+    <div class="post-content prose" data-vertical="pensamiento">
       <Content />
     </div>
   </article>
@@ -53,5 +53,4 @@ const minutes = readingTime(entry.body);
   .post-tags { list-style: none; display: flex; gap: 0.5rem; flex-wrap: wrap; }
   .post-tags li { font-size: 0.75rem; color: var(--color-text-muted); background: var(--color-bg-surface); padding: 0.2rem 0.6rem; border-radius: var(--radius-full); border: 1px solid var(--color-border); }
   .post-player { margin-bottom: 2rem; }
-  .post-content { color: var(--color-text-secondary); }
 </style>

@@ -3,7 +3,7 @@ title: "Why should we worry about the disappearance of rituals"
 date: "2026-06-18"
 description: "The risk we are taking by not stopping to make time habitable"
 tags: ["filosofia", "opinion"]
-cover: "/img/linea_curva.svg"
+cover: "/img/retratos/retrato-han.jpg"
 lang: en
 postId: rituales
 podcastEpisodeUrl: "https://player.rss.com/la-maquina-de-ser-feliz/2905651?theme=dark&v=2"

@@ -7,7 +7,7 @@
     <marker id="fG" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#22c55e"/></marker>
     <marker id="fW" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#4ade80"/></marker>
   </defs>
-  <rect width="600" height="360" fill="#0c0f0c"/><rect width="600" height="360" fill="url(#cgf)"/>
+  <rect x="-1200" y="-1200" width="3000" height="2760" fill="#0c0f0c"/><rect x="-1200" y="-1200" width="3000" height="2760" fill="url(#cgf)"/>
 
   <!-- TITULO ARCADE (bitmap, sin dependencia de fuentes) -->
   <rect x="174" y="18" width="4" height="4" fill="#4ade80" opacity="1"/>
